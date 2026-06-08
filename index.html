@@ -219,6 +219,21 @@ body.locked .kpi-input{opacity:.5;cursor:not-allowed;background:#F2F6FA}
 </head>
 <body>
 <div id="app"></div>
+
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(10,30,50,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(3px)">
+  <div class="modal-box">
+    <div class="modal-icon">🔐</div>
+    <div class="modal-title">Modo de Edição</div>
+    <div class="modal-desc">Digite a senha para habilitar edições. As alterações serão salvas no Google Sheets e visíveis para todos que acessarem o link.</div>
+    <input type="password" id="modal-pass" class="modal-input" placeholder="Senha de edição"/>
+    <div id="modal-error" class="modal-error">Senha incorreta. Tente novamente.</div>
+    <div class="modal-btns">
+      <button id="modal-cancel" class="modal-btn modal-btn-cancel">Cancelar</button>
+      <button id="modal-confirm" class="modal-btn modal-btn-ok">Entrar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ──────────────────────────────────────────────────
 // DATA
@@ -697,18 +712,5 @@ render();
 loadData();
 </script>
 
-<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(10,30,50,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(3px)">
-  <div class="modal-box">
-    <div class="modal-icon">🔐</div>
-    <div class="modal-title">Modo de Edição</div>
-    <div class="modal-desc">Digite a senha para habilitar edições. As alterações serão salvas no Google Sheets e visíveis para todos que acessarem o link.</div>
-    <input type="password" id="modal-pass" class="modal-input" placeholder="Senha de edição"/>
-    <div id="modal-error" class="modal-error">Senha incorreta. Tente novamente.</div>
-    <div class="modal-btns">
-      <button id="modal-cancel" class="modal-btn modal-btn-cancel">Cancelar</button>
-      <button id="modal-confirm" class="modal-btn modal-btn-ok">Entrar</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
