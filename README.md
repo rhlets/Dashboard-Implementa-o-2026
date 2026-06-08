@@ -1,861 +1,759 @@
-import { useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LET'S RH · Implementação 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#F0F5FA;--surface:#FFF;--surface2:#F7FAFD;--border:#DDE8F0;
+  --t1:#1A2D40;--t2:#3A5570;--t3:#608098;--t4:#90AABF;
+  --orange:#E05525;--orange2:#F07050;--orange-bg:#FEF2EE;--orange-ring:#F8B0A0;
+  --green:#0A7055;--green-bg:#EAFAF5;--green-ring:#80D8B8;
+  --amber:#9A5800;--amber-bg:#FFF8EC;--amber-ring:#F0C878;
+  --blue:#2060D0;--purple:#7C3AED;--pink:#C026D3;--teal:#0D9488;
+  --r:14px;--sh:0 1px 5px rgba(20,50,80,.06);
+  --font:'Plus Jakarta Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#C8D8E8;border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:#A8BDD0}
+input[type=date]::-webkit-calendar-picker-indicator{opacity:.35;cursor:pointer}
+input[type=number]::-webkit-inner-spin-button{opacity:.4}
+select option{background:#FFF}
+button{font-family:var(--font);cursor:pointer;transition:filter .12s}
+button:hover{filter:brightness(.93)}
 
-// ─────────────────────────────────────────────────────────────
-// COMPLETE DATA — all fields from spreadsheet
-// ─────────────────────────────────────────────────────────────
-const QUARTERS = [
-  {
-    id:"Q1.1", label:"Q1.1", color:"#FF5A1A",
-    name:"Fundamentação e Estruturação Básica", period:"Junho – Agosto 2026",
-    phases:[
-      {
-        id:"P01", num:"01", name:"Diagnóstico e Alinhamento Estratégico",
-        responsible:"Gestor(a) de RH",
-        participants:["Liderança Executiva","Gestores de Tecnologia e CS","Equipe de TI","Colaboradores Chave"],
-        marcos:["Compreensão aprofundada da cultura e processos atuais","Benefícios PJ organizados e comunicados","Base documental essencial estabelecida e acessível","Estrutura inicial do RH definida"],
-        kpis:["% de gestores entrevistados (meta: 100%)","% de VMMV e Manifesto Cultural aprovados pela liderança (meta: 100%)","% de políticas essenciais criadas e aprovadas (meta: 100%)","Repositório ativo com 100% dos documentos iniciais migrados","Estrutura do RH definida e comunicada internamente","PDI inicial para o RH em andamento"],
-        goals:["Concluir o diagnóstico e mapeamento de processos em 100%","Criar e aprovar 3 políticas essenciais","Implementar o repositório de cultura e migrar 100% dos documentos existentes","Definir a estrutura e iniciar o PDI do RH"],
-        items:[
-          {id:"1.1",name:"Mapeamento de Processos de RH Atuais",wr:"Sem. 1–3",period:"Junho",ws:1,we:3,
-            desc:"Entrevistas com gestores, levantamento de processos informais, análise cultural, ferramentas de comunicação.",
-            bullets:["Entrevistas aprofundadas com gestores (Tecnologia, CS e outros) para entender desafios, expectativas e percepções sobre gestão de pessoas","Levantamento de processos informais de contratação, desligamento, comunicação e gestão de benefícios","Análise de documentos culturais existentes","Levantamento de ferramentas de comunicação (Slack) e outras tecnologias"]},
-          {id:"1.2",name:"Estruturação de Documentos Essenciais",wr:"Sem. 2–5",period:"Jun – Jul",ws:2,we:5,
-            desc:"Código de Conduta, Políticas Fundamentais, Repositório Centralizado, Manual de Benefícios PJ.",
-            bullets:["Criação do Código de Conduta e Ética da empresa","Elaboração de Políticas Fundamentais: Anticorrupção, Segurança da Informação, Uso de Recursos da Empresa","Desenvolvimento de Guia de Boas Práticas para uso do Slack (etiqueta, canais, performance)","Implementação de Repositório Centralizado de Documentos — seleção e configuração de plataforma (Google Drive, SharePoint, Notion)","Migração dos documentos existentes para o repositório","Levantamento detalhado de todos os benefícios oferecidos aos PJs","Criação do Espaço Cultura LET'S — regras, elegibilidade e como utilizar","Comunicação do Manual de Benefícios aos colaboradores"]},
-          {id:"1.3",name:"Estruturação do Setor de RH",wr:"Sem. 2–4",period:"Junho",ws:2,we:4,
-            desc:"Estrutura organizacional do RH, competências, base integrada ao Claude, ficha de registro.",
-            bullets:["Definição da estrutura organizacional do RH (funções e responsabilidades)","Mapeamento das competências necessárias para o time de RH","Criação da base de gestão de pessoas integrada ao Claude","Melhoria da ficha de registro LET'S"]}
-        ]
-      },
-      {
-        id:"P02", num:"02", name:"Onboarding e Integração",
-        responsible:"Gestor(a) de RH",
-        participants:["Gestores de Tecnologia e CS","Novos Colaboradores","Financeiro"],
-        marcos:["Programa de Onboarding estruturado e piloto realizado","Integração entre times iniciada","VMMV formalizados e comunicados"],
-        kpis:["% de novos colaboradores que passaram pelo onboarding piloto (meta: 100%)","% de colaboradores que acessaram o Manual de Benefícios","Feedback positivo dos participantes do onboarding piloto","Início de iniciativas de integração entre times"],
-        goals:["Desenvolver e testar o programa de onboarding","Iniciar a estrutura de VMMV"],
-        items:[
-          {id:"2.1",name:"Desenvolvimento do Programa de Onboarding",wr:"Sem. 5–6",period:"Julho",ws:5,we:6,
-            desc:"Roteiro de onboarding (pré-boarding → 1º mês), kit de boas-vindas digital.",
-            bullets:["Criação de roteiro de onboarding para novos colaboradores (pré-boarding, 1º dia, 1ª semana, 1º mês)","Conteúdo do onboarding: cultura, VMMV, políticas, apresentação da empresa, áreas e ferramentas","Desenvolvimento de kit de boas-vindas digital"]},
-          {id:"2.2",name:"Integração entre Times",wr:"Sem. 6–8",period:"Julho",ws:6,we:8,
-            desc:"Café com o Líder, Shadowing, projetos interdepartamentais Tecnologia ↔ CS.",
-            bullets:["Mapeamento de pontos de contato e dependências entre Tecnologia e CS","Criação de iniciativas de integração: 'Café com o Líder', 'Shadowing' entre áreas","Implementação de projetos interdepartamentais"]},
-          {id:"2.3",name:"Formalização de VMMV e Cultura",wr:"Sem. 5–7",period:"Julho",ws:5,we:7,
-            desc:"Workshops de co-criação com liderança, Manifesto Cultural.",
-            bullets:["Workshops com a liderança para co-criação/validação da Visão, Missão e Valores","Definição de 'quem queremos ser' como cultura","Elaboração de Manifesto Cultural ou Princípios de Cultura"]}
-        ]
-      },
-      {
-        id:"P03", num:"03", name:"Base de Gestão de Pessoas e IA",
-        responsible:"Gestor(a) de RH",
-        participants:["Equipe de TI","Liderança Executiva","Gestores de Tecnologia e CS"],
-        marcos:["Base de Gestão de Pessoas implementada","IA integrada na gestão de documentos","Desenho inicial de níveis hierárquicos e autonomia"],
-        kpis:["HRIS/Plataforma Cloud implementada com dados de 100% dos colaboradores","Ferramenta de IA para gestão de documentos configurada e em uso pelo RH","Esboço de níveis hierárquicos e autonomia para Tecnologia e CS","Feedback positivo do RH sobre a ferramenta de IA"],
-        goals:["Implementar a Base de Gestão de Pessoas (Cloud)","Integrar documentos em nuvem e IA na gestão","Apresentar desenho inicial de níveis hierárquicos e autonomia para validação"],
-        items:[
-          {id:"3.1",name:"Implementação da Base de Gestão de Pessoas",wr:"Sem. 6–9",period:"Jul – Ago",ws:6,we:9,
-            desc:"HRIS / plataforma Cloud, migração de dados, perfis de acesso.",
-            bullets:["Seleção e configuração de HRIS (BambooHR, Sólides) ou plataforma Cloud (Notion/Airtable) para centralizar dados de colaboradores PJ","Migração inicial de dados de colaboradores para a plataforma","Definição de perfis de acesso e segurança"]},
-          {id:"3.2",name:"Integração de IA na Gestão de Documentos",wr:"Sem. 9–11",period:"Agosto",ws:9,we:11,
-            desc:"Categorização automática, busca inteligente, sumarização, treinamento.",
-            bullets:["Exploração e implementação de ferramentas de IA para categorização automática de documentos","Busca inteligente por palavras-chave e conteúdo","Sumarização de políticas com IA","Treinamento da equipe de RH para uso das ferramentas"]},
-          {id:"3.3",name:"Desenho Inicial de Níveis Hierárquicos e Autonomia",wr:"Sem. 10–12",period:"Agosto",ws:10,we:12,
-            desc:"Estrutura de níveis (Júnior → Liderança), indicadores de autonomia.",
-            bullets:["Mapeamento das principais funções e responsabilidades","Esboço de estrutura de níveis (Júnior, Pleno, Sênior, Especialista, Liderança) para Tecnologia e CS","Definição de indicadores de autonomia esperada para cada nível"]}
-        ]
-      }
-    ]
-  },
-  {
-    id:"Q1.2", label:"Q1.2", color:"#C026D3",
-    name:"Desenvolvimento de Lideranças e Performance", period:"Agosto – Outubro 2026",
-    phases:[
-      {
-        id:"P04", num:"04", name:"Capacitação de Lideranças",
-        responsible:"Gestor(a) de RH",
-        participants:["Gestores de Tecnologia e CS","Liderança Executiva","Colaboradores"],
-        marcos:["Programa de Desenvolvimento de Lideranças (PDL) iniciado","Cultura de feedback contínuo implementada"],
-        kpis:["% de gestores nos módulos iniciais do PDL (meta: 80%)","% de colaboradores no treinamento de feedback (meta: 70%)","Taxa de adesão aos 'Check-ins de Feedback' (meta: 60%)","Feedback positivo dos gestores sobre o PDL"],
-        goals:["Iniciar o PDL com 2 módulos","Treinar 70% dos colaboradores em feedback","Implementar a ferramenta de registro de feedback"],
-        items:[
-          {id:"4.1",name:"Lançamento do PDL — Programa de Desenvolvimento de Lideranças",wr:"Sem. 11–13",period:"Agosto",ws:11,we:13,
-            desc:"Módulos de liderança essencial, feedback construtivo e alta performance.",
-            bullets:["Módulo 'Liderança Essencial': comunicação, delegação, gestão de conflitos","Módulo 'Feedback Construtivo': como dar e receber feedback de forma estruturada","Módulo 'Gestão de Equipes de Alta Performance': metodologias e práticas","Workshops presenciais ou online","Criação de guia para gestores sobre como aplicar os aprendizados"]},
-          {id:"4.2",name:"Implementação da Cultura de Feedback",wr:"Sem. 12–13",period:"Agosto",ws:12,we:13,
-            desc:"Treinamento para colaboradores, check-ins, ferramenta de registro.",
-            bullets:["Treinamento para todos os colaboradores sobre a importância e como dar/receber feedback","Criação de modelo de 'Check-in de Feedback' (mensal ou quinzenal) para gestores e liderados","Ferramenta para registro de feedback (módulo do HRIS ou ferramenta dedicada)"]}
-        ]
-      },
-      {
-        id:"P05", num:"05", name:"Gestão de Performance e PDI",
-        responsible:"Gestor(a) de RH",
-        participants:["Gestores de Tecnologia e CS","Colaboradores","Liderança Executiva"],
-        marcos:["Ciclo de Avaliação de Desempenho (gestor-colaborador) concluído","PDIs formalizados e em andamento","Política de Retenção em desenvolvimento"],
-        kpis:["% de colaboradores com avaliação concluída (meta: 100%)","% de colaboradores com PDI formalizado (meta: 90%)","Rascunho da Política de Retenção elaborado","Feedback dos colaboradores sobre o processo de avaliação"],
-        goals:["Concluir o 1º ciclo de avaliação de desempenho","Garantir que 90% dos colaboradores tenham PDI","Apresentar o rascunho da Política de Retenção para a liderança"],
-        items:[
-          {id:"5.1",name:"Implementação da Avaliação de Desempenho",wr:"Sem. 14–16",period:"Setembro",ws:14,we:16,
-            desc:"Critérios, formulário, treinamento de gestores, 1º ciclo.",
-            bullets:["Definição de critérios de avaliação alinhados aos VMMV e objetivos da empresa","Criação de formulário de avaliação (módulo do HRIS ou ferramenta específica)","Treinamento para gestores sobre como realizar a avaliação e dar feedback","Realização do 1º ciclo de avaliação de desempenho (gestor-colaborador)"]},
-          {id:"5.2",name:"Formalização de PDIs",wr:"Sem. 16–17",period:"Setembro",ws:16,we:17,
-            desc:"PDIs baseados em avaliações e objetivos de carreira, ferramenta de acompanhamento.",
-            bullets:["Orientação para gestores e colaboradores na criação de PDIs baseados nos resultados da avaliação","Alinhamento com objetivos de carreira individuais","Ferramenta para acompanhamento dos PDIs (módulo do HRIS)"]},
-          {id:"5.3",name:"Desenvolvimento da Política de Retenção",wr:"Sem. 14–16",period:"Setembro",ws:14,we:16,
-            desc:"Pesquisa de mercado, brainstorming com liderança, elaboração.",
-            bullets:["Pesquisa de mercado sobre práticas de retenção para PJs","Brainstorming com a liderança sobre fatores de retenção (reconhecimento, desenvolvimento, ambiente, benefícios)","Início da elaboração da Política de Retenção"]}
-        ]
-      },
-      {
-        id:"P06", num:"06", name:"Estrutura de Cargos e Fluxos",
-        responsible:"Gestor(a) de RH",
-        participants:["Liderança Executiva","Gestores de Tecnologia e CS","Financeiro","Jurídico","Equipe de TI"],
-        marcos:["Estrutura de Cargos e Salários PJ definida","Sistema de Gestão de Contratos implementado","Fluxo de aprovação de cadeiras desenhado e comunicado"],
-        kpis:["Estrutura de Cargos e Salários PJ aprovada pela liderança","Sistema de gestão de contratos ativo com 100% dos contratos migrados","Feedback dos gestores sobre a clareza da estrutura de cargos"],
-        goals:["Definir e comunicar a Estrutura de Cargos e Salários PJ","Implementar o sistema de gestão de contratos","Desenhar e comunicar o fluxo de aprovação de cadeiras"],
-        items:[
-          {id:"6.1",name:"Estrutura de Cargos e Salários PJ",wr:"Sem. 15–18",period:"Set – Out",ws:15,we:18,
-            desc:"Mapeamento, descrições, benchmarking PJ, grades, análise CLT x PJ.",
-            bullets:["Mapeamento detalhado de cargos e funções existentes","Definição de descrições de cargos (responsabilidades, requisitos, competências)","Pesquisa de mercado para benchmarking de remuneração PJ","Criação de tabela de referência de remuneração por nível/cargo/grades","Análise CLT x PJ","Comunicação da estrutura aos gestores"]},
-          {id:"6.2",name:"Sistema de Gestão de Contratos PJ",wr:"Sem. 18–20",period:"Outubro",ws:18,we:20,
-            desc:"Ferramenta de contratos, migração de contratos existentes, alertas de vencimento.",
-            bullets:["Seleção e configuração de ferramenta para controle de contratos PJ (módulo HRIS ou software dedicado)","Migração de todos os contratos existentes para o sistema","Definição de alertas para vencimento de contratos"]},
-          {id:"6.3",name:"Fluxo de Aprovação de Cadeiras",wr:"Sem. 19–20",period:"Outubro",ws:19,we:20,
-            desc:"Fluxo formal, formulário padronizado, comunicação aos gestores.",
-            bullets:["Mapeamento do processo atual de solicitação de novas posições","Fluxo formal: Requisição do Gestor → Análise RH → Aprovação Financeira → Aprovação da Liderança Executiva","Criação de formulário padronizado para solicitação de cadeiras","Comunicação do fluxo e formulário aos gestores"]}
-        ]
-      }
-    ]
-  },
-  {
-    id:"T1.1", label:"T1.1", color:"#7C3AED",
-    name:"Cultura de Desenvolvimento e Engajamento", period:"Outubro – Novembro 2026",
-    phases:[
-      {
-        id:"P07", num:"07", name:"Avaliação 360° e Desenvolvimento Contínuo",
-        responsible:"Gestor(a) de RH",
-        participants:["Gestores de Tecnologia e CS","Colaboradores","Liderança Executiva"],
-        marcos:["Ciclo de Avaliação 360° concluído","Programas de desenvolvimento contínuo em andamento"],
-        kpis:["% de colaboradores que participaram da Avaliação 360° (meta: 80%)","% de colaboradores com plano de ação pós-360°","% de participação nos workshops/treinamentos","Feedback positivo sobre a relevância dos programas"],
-        goals:["Concluir o 1º ciclo de Avaliação 360°","Lançar 2 programas de desenvolvimento contínuo","Criar a biblioteca de recursos de aprendizagem"],
-        items:[
-          {id:"7.1",name:"Implementação da Avaliação 360°",wr:"Sem. 19–21",period:"Outubro",ws:19,we:21,
-            desc:"Competências avaliadas, ferramenta, treinamento, 1º ciclo, devolutivas.",
-            bullets:["Definição de competências a serem avaliadas (alinhadas aos VMMV e descrições de cargo)","Seleção de ferramenta para Avaliação 360° (módulo HRIS ou ferramenta dedicada)","Treinamento para gestores e colaboradores sobre o processo e a importância do feedback 360°","Realização do 1º ciclo de Avaliação 360°","Sessões de devolutiva e apoio na interpretação dos resultados"]},
-          {id:"7.2",name:"Programas de Desenvolvimento Contínuo",wr:"Sem. 20–22",period:"Out – Nov",ws:20,we:22,
-            desc:"Workshops, mentoria interna/coaching, biblioteca de recursos.",
-            bullets:["Oferta de workshops e treinamentos específicos baseados nas lacunas identificadas nas avaliações e PDIs","Lançamento de programas de mentoria interna (gestores experientes mentorando colaboradores) ou coaching","Criação de biblioteca de recursos de aprendizagem (cursos online, artigos, livros)"]}
-        ]
-      },
-      {
-        id:"P08", num:"08", name:"Gestão de Talentos e Desligamento",
-        responsible:"Gestor(a) de RH",
-        participants:["Liderança Executiva","Gestores de Tecnologia e CS","Jurídico","Financeiro"],
-        marcos:["Política de Desligamento estruturada e comunicada","Mapeamento de Talentos e Sucessão iniciado","Fluxo de aprovação de desligamento desenhado e comunicado"],
-        kpis:["Política de Desligamento aprovada e comunicada","% de gestores treinados em desligamento","Mapeamento de talentos chave iniciado","Fluxo de aprovação de desligamento documentado e comunicado","Taxa de preenchimento de entrevistas de saída (meta: 80%)"],
-        goals:["Formalizar e comunicar a Política de Desligamento","Iniciar o mapeamento de talentos e sucessão","Desenhar e comunicar o fluxo de aprovação de desligamento"],
-        items:[
-          {id:"8.1",name:"Política de Desligamento",wr:"Sem. 22–23",period:"Novembro",ws:22,we:23,
-            desc:"Política humanizada, treinamento de gestores, entrevista de saída.",
-            bullets:["Elaboração de política de desligamento humanizada e transparente (processo, comunicação, feedback, documentação)","Treinamento para gestores sobre como conduzir um desligamento","Criação de formulário de entrevista de desligamento para coletar feedback","Comunicação da política aos gestores"]},
-          {id:"8.2",name:"Mapeamento de Talentos e Sucessão",wr:"Sem. 23–25",period:"Novembro",ws:23,we:25,
-            desc:"Posições críticas, Nine Box Grid, planejamento de sucessão.",
-            bullets:["Identificação de posições críticas e talentos chave na empresa","Criação de 'Nine Box Grid' ou ferramenta similar para avaliar potencial e performance","Início do planejamento de sucessão para posições estratégicas"]},
-          {id:"8.3",name:"Fluxo de Aprovação de Desligamento",wr:"Sem. 22–24",period:"Novembro",ws:22,we:24,
-            desc:"Fluxo: Gestor → RH → Liderança → Jurídico → Financeiro.",
-            bullets:["Mapeamento do processo atual de desligamento","Fluxo formal: Solicitação do Gestor → Análise RH (motivo, impacto) → Aprovação da Liderança → Aprovação Jurídica (conformidade) → Aprovação Financeira","Criação de formulário padronizado para solicitação de desligamento","Comunicação do fluxo e formulário aos gestores"]}
-        ]
-      },
-      {
-        id:"P09", num:"09", name:"Clima e Comunicação Interna",
-        responsible:"Gestor(a) de RH",
-        participants:["Liderança Executiva","Gestores de Tecnologia e CS","Colaboradores","Equipe de Marketing/Comunicação"],
-        marcos:["Pesquisa de Clima Organizacional realizada","Plano de Ação pós-pesquisa em andamento","Canais de comunicação interna fortalecidos"],
-        kpis:["% de participação na pesquisa de clima (meta: 80%)","Plano de ação de clima elaborado e comunicado","% de ações do plano de clima iniciadas","Feedback positivo sobre a transparência dos resultados","Ferramenta de IA para análise de sentimento em teste"],
-        goals:["Realizar a pesquisa de clima com 80% de participação","Elaborar e comunicar o plano de ação de clima","Lançar a newsletter interna","Iniciar a integração de IA na comunicação interna"],
-        items:[
-          {id:"9.1",name:"Pesquisa de Clima Organizacional",wr:"Sem. 22–24",period:"Novembro",ws:22,we:24,
-            desc:"Ferramenta, perguntas sobre engajamento e liderança, coleta e análise.",
-            bullets:["Seleção de ferramenta para pesquisa de clima (SurveyMonkey, Typeform ou ferramenta especializada)","Definição de perguntas e temas: engajamento, liderança, cultura, ambiente de trabalho, benefícios","Lançamento e coleta de dados da pesquisa","Análise dos resultados e elaboração de relatório"]},
-          {id:"9.2",name:"Plano de Ação Pós-Pesquisa de Clima",wr:"Sem. 24–25",period:"Novembro",ws:24,we:25,
-            desc:"Apresentação dos resultados, plano de ação, grupos de trabalho.",
-            bullets:["Apresentação dos resultados à liderança e aos colaboradores (transparência)","Criação de plano de ação com iniciativas para abordar os pontos de melhoria identificados","Formação de grupos de trabalho para implementar as ações"]},
-          {id:"9.3",name:"Fortalecimento da Comunicação Interna",wr:"Sem. 23–25",period:"Novembro",ws:23,we:25,
-            desc:"Calendário editorial, Newsletter Interna, IA para análise de sentimento.",
-            bullets:["Avaliação dos canais de comunicação existentes (Slack, e-mail, reuniões)","Criação de calendário editorial de comunicação interna","Lançamento de Newsletter Interna ou canal de notícias regular","Exploração de ferramentas de IA para análise de sentimento no Slack e otimização de mensagens"]}
-        ]
-      }
-    ]
-  },
-  {
-    id:"T1.2", label:"T1.2", color:"#0D9488",
-    name:"Otimização, Inovação e Sustentabilidade", period:"Dezembro 2026",
-    phases:[
-      {
-        id:"P10", num:"10", name:"Otimização de Processos e IA",
-        responsible:"Gestor(a) de RH",
-        participants:["Equipe de TI","Gestores de Tecnologia e CS","Liderança Executiva"],
-        marcos:["Processos de RH otimizados e automatizados","IA integrada em Recrutamento e Seleção (R&S)","Centralização de informações aprimorada com IA"],
-        kpis:["% de processos de RH com automação implementada (meta: 30%)","Ferramenta de IA para R&S em uso","Funcionalidades avançadas de IA no repositório ativas","Redução do tempo médio de triagem de currículos","Feedback positivo do RH sobre eficiência das automações"],
-        goals:["Automatizar 30% dos processos de RH","Implementar IA em R&S","Aprimorar a centralização de informações com IA"],
-        items:[
-          {id:"10.1",name:"Otimização e Automação de Processos de RH",wr:"Sem. 26–27",period:"Dezembro",ws:26,we:27,
-            desc:"Revisão de processos, gargalos, automações de workflows e integrações.",
-            bullets:["Revisão de todos os processos de RH implementados (onboarding, avaliação, desligamento, etc.)","Identificação de gargalos e oportunidades de automação","Implementação de automações: e-mails automáticos, workflows e integração entre sistemas"]},
-          {id:"10.2",name:"Integração de IA em Recrutamento e Seleção",wr:"Sem. 26–27",period:"Dezembro",ws:26,we:27,
-            desc:"Triagem de currículos, análise de perfis, chatbots para candidatos.",
-            bullets:["Exploração e implementação de ferramentas de IA para triagem de currículos (análise de palavras-chave e competências)","Análise de perfil de candidatos com IA","Chatbots para pré-entrevistas e FAQ de candidatos","Treinamento para o RH no uso das ferramentas"]},
-          {id:"10.3",name:"Centralização de Informações com IA Avançada",wr:"Sem. 26–28",period:"Dezembro",ws:26,we:28,
-            desc:"Busca semântica, sumarização automática, relatórios com IA.",
-            bullets:["Aprimoramento do repositório Cloud com busca semântica avançada","Sumarização automática de documentos longos com IA","Geração de relatórios e insights a partir de dados não estruturados"]}
-        ]
-      },
-      {
-        id:"P11", num:"11", name:"Avaliação de Liderança e Reconhecimento",
-        responsible:"Gestor(a) de RH",
-        participants:["Liderança Executiva","Gestores de Tecnologia e CS","Colaboradores","Financeiro"],
-        marcos:["Política de Avaliação do Gestor implementada"],
-        kpis:["% de gestores avaliados pelos colaboradores (meta: 90%)"],
-        goals:["Implementar a Política de Avaliação do Gestor"],
-        items:[
-          {id:"11.1",name:"Política de Avaliação do Gestor pelos Colaboradores",wr:"Sem. 26–27",period:"Dezembro",ws:26,we:27,
-            desc:"Critérios, ferramenta, 1º ciclo de avaliação, sessões de devolutiva.",
-            bullets:["Definição de critérios para avaliação dos gestores pelos colaboradores (liderança, comunicação, desenvolvimento da equipe, feedback)","Seleção de ferramenta para a avaliação (módulo do HRIS ou ferramenta dedicada)","Lançamento do 1º ciclo de avaliação dos gestores","Sessões de devolutiva para os gestores e planos de desenvolvimento"]}
-        ]
-      },
-      {
-        id:"P12", num:"12", name:"Planejamento Estratégico e Sustentabilidade",
-        responsible:"Gestor(a) de RH",
-        participants:["Liderança Executiva","Gestores de Tecnologia e CS","Equipe de TI","Financeiro"],
-        marcos:["Planejamento Estratégico de RH para o próximo ano","Relatório de Indicadores de RH consolidado","Base de Gestão de Pessoas completa e funcional"],
-        kpis:["Plano Estratégico de RH para o próximo ano aprovado","Dashboard de KPIs de RH atualizado e apresentado mensalmente","HRIS/Plataforma Cloud com 100% dos dados e funcionalidades ativas","Feedback positivo da liderança sobre a contribuição estratégica do RH"],
-        goals:["Apresentar o Plano Estratégico de RH para o próximo ano","Consolidar e apresentar o dashboard de KPIs de RH","Garantir a plena funcionalidade da Base de Gestão de Pessoas (Cloud)"],
-        items:[
-          {id:"12.1",name:"Planejamento Estratégico de RH Anual",wr:"Sem. 28",period:"Dezembro",ws:28,we:28,
-            desc:"Revisão dos resultados, objetivos, metas e orçamento para o próximo ciclo.",
-            bullets:["Revisão dos resultados do ano","Definição de objetivos e metas de RH para o próximo ciclo, alinhados aos objetivos de negócio","Orçamento de RH para o próximo ano"]},
-          {id:"12.2",name:"Dashboard de Indicadores de RH (KPIs)",wr:"Sem. 28",period:"Dezembro",ws:28,we:28,
-            desc:"Dashboard completo no HRIS/Power BI, apresentação à liderança.",
-            bullets:["Criação de dashboard completo de KPIs de RH (utilizando HRIS, Power BI ou outra ferramenta)","Apresentação regular dos resultados à liderança executiva"]},
-          {id:"12.3",name:"Base de Gestão de Pessoas (Cloud) Completa",wr:"Sem. 28",period:"Dezembro",ws:28,we:28,
-            desc:"HRIS totalmente funcional, dados migrados, processos integrados, IA otimizada.",
-            bullets:["Garantir que o HRIS/plataforma Cloud esteja totalmente funcional","100% dos dados migrados, processos integrados e IA otimizada","Documentação completa de todos os processos e sistemas de RH"]}
-        ]
-      }
-    ]
-  }
+/* HEADER */
+.header{background:#FFF;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:10;box-shadow:0 1px 8px rgba(20,50,80,.07)}
+.logo-mark{width:36px;height:36px;border-radius:9px;background:linear-gradient(140deg,#E05525,#F07858);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(224,85,37,.25)}
+.logo-wordmark{display:flex;flex-direction:column;gap:1px}
+.logo-top{font-size:16px;font-weight:800;line-height:1;letter-spacing:-.4px;color:var(--t1)}
+.logo-top span.org{color:var(--orange)}
+.logo-top span.div{color:var(--t4);font-weight:400;font-size:13px;margin-left:5px}
+.logo-sub{font-size:9px;color:var(--t4);letter-spacing:.1em;font-weight:600}
+.hdivider{width:1px;height:34px;background:var(--border);flex-shrink:0}
+.h-stats{display:flex;gap:22px;flex:1;flex-wrap:wrap}
+.h-stat{display:flex;align-items:baseline;gap:5px}
+.h-stat-n{font-size:19px;font-weight:800;line-height:1}
+.h-stat-l{font-size:11px;color:var(--t4);line-height:1.2}
+.h-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.h-pct{text-align:right}
+.h-pct-label{font-size:9px;color:var(--t4);font-weight:700;letter-spacing:.08em}
+.h-pct-num{font-size:20px;font-weight:800;color:var(--orange);line-height:1}
+
+/* NAV */
+.nav{background:#FFF;border-bottom:1px solid var(--border);padding:0 28px;display:flex;position:sticky;top:65px;z-index:9}
+.tab-btn{padding:11px 17px;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tab-btn:hover{color:var(--t2)}
+.tab-btn.active{color:var(--orange);border-bottom-color:var(--orange)}
+
+/* CONTENT */
+.content{padding:24px;max-width:1400px}
+
+/* CARD */
+.card{background:#FFF;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh)}
+
+/* CHIP */
+.chip{display:inline-flex;align-items:center;font-size:11px;font-weight:600;border-radius:20px;padding:3px 10px;line-height:1;white-space:nowrap;border:1px solid}
+
+/* PROGRESS BAR */
+.pbar-wrap{background:#E8F0F8;border-radius:99px;overflow:hidden}
+.pbar-fill{border-radius:99px;transition:width .4s}
+
+/* STAT CARD */
+.stat-card{padding:20px 22px;border-top:3px solid}
+
+/* GRID */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-1-2{display:grid;grid-template-columns:1fr 2fr;gap:14px}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+
+/* TASK ROWS */
+.task-row{border-bottom:1px solid #EEF4FA;transition:background .2s}
+.task-row.is-done{background:#F5FDF9}
+.task-content{display:flex;align-items:center;gap:10px;padding:12px 18px;flex-wrap:wrap}
+.task-desc-box{display:none;padding:0 18px 14px 52px}
+.task-desc-box.open{display:block}
+
+/* ACCORDIONS */
+.acc-header{display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:pointer;background:#FFF;border-bottom:1px solid transparent;user-select:none}
+.acc-header.open{background:#FAFCFE;border-bottom-color:#EEF4FA}
+.acc-arrow{transition:transform .2s;font-size:14px;color:var(--t4);line-height:1;margin-left:2px}
+.acc-header.open .acc-arrow{transform:rotate(90deg)}
+.acc-body{display:none}
+.acc-body.open{display:block}
+
+/* FORMS */
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.finput{background:#FFF;border:1px solid var(--border);border-radius:8px;color:var(--t2);font-size:12px;padding:8px 12px;font-family:var(--font);outline:none}
+.finput:focus{border-color:var(--orange)}
+.date-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;padding:4px 9px;font-family:var(--font);cursor:pointer;outline:none;color:var(--t4)}
+.date-input.has-date{color:#C04020;border-color:#F8B0A0}
+.status-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap;line-height:1;border:1px solid}
+
+/* KPI STYLES */
+.kpi-row{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid #EEF4FA;flex-wrap:wrap;transition:background .2s}
+.kpi-row.kpi-ok{background:#F5FDF9}
+.kpi-text{flex:1;min-width:200px;font-size:13px;color:var(--t2);line-height:1.4}
+.kpi-text.done-text{color:var(--t4);text-decoration:line-through}
+.kpi-num-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.kpi-input{width:64px;padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;font-family:var(--font);text-align:center;color:var(--t1);background:#FFF;outline:none}
+.kpi-input:focus{border-color:var(--orange)}
+.kpi-meta{font-size:11px;color:var(--t4);white-space:nowrap}
+.kpi-bar-wrap{width:70px}
+.kpi-toggle{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap;line-height:1.2;border:1px solid}
+.kpi-toggle.achieved{color:#0A7055;background:#EAFAF5;border-color:#80D8B8}
+.kpi-toggle.pending{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-ring)}
+.kpi-status-chip{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid;white-space:nowrap}
+
+/* DETAIL SECTIONS */
+.detail-section{margin-bottom:20px}
+.detail-section-title{font-size:11px;font-weight:700;color:var(--t4);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.info-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.info-box-title{font-size:11px;font-weight:700;color:var(--t4);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.bullet-li{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:5px}
+.bullet-dot{font-size:9px;margin-top:4px;flex-shrink:0}
+.kpi-card-d{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--t2);line-height:1.4}
+.goal-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:6px}
+
+/* TIMELINE */
+.timeline-wrap{overflow-x:auto;padding-bottom:16px}
+.tl-month-row,.tl-week-row{display:flex;padding-left:220px}
+.tl-month-cell{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;border-left:1px solid var(--border);padding-left:6px}
+.tl-week-cell{text-align:center;font-size:9px;color:#B8D0E0;border-left:1px solid #EEF4FA}
+.tl-row{display:flex;align-items:center;height:24px;margin-bottom:2px}
+.tl-label{width:220px;flex-shrink:0;padding-right:12px;font-size:10px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-bar-wrap{flex:1;position:relative;height:100%}
+.tl-bar{position:absolute;top:12%;height:76%;border-radius:3px}
+.tl-legend{display:flex;gap:20px;padding-left:220px;margin-top:12px;flex-wrap:wrap}
+.tl-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3)}
+.tl-legend-color{width:20px;height:6px;border-radius:3px}
+
+/* UTILS */
+.flex{display:flex}.flex-col{display:flex;flex-direction:column}
+.items-center{align-items:center}.items-start{align-items:flex-start}
+.justify-between{justify-content:space-between}.flex-1{flex:1}
+.flex-wrap{flex-wrap:wrap}.flex-shrink-0{flex-shrink:0}
+.gap-6{gap:6px}.gap-8{gap:8px}.gap-10{gap:10px}.gap-12{gap:12px}
+.gap-14{gap:14px}.gap-16{gap:16px}.gap-20{gap:20px}.gap-24{gap:24px}
+.mb-4{margin-bottom:4px}.mb-6{margin-bottom:6px}.mb-8{margin-bottom:8px}
+.mb-10{margin-bottom:10px}.mb-12{margin-bottom:12px}.mb-14{margin-bottom:14px}
+.mb-20{margin-bottom:20px}.mb-24{margin-bottom:24px}
+.mt-2{margin-top:2px}.mt-3{margin-top:3px}.mt-4{margin-top:4px}.mt-6{margin-top:6px}.mt-8{margin-top:8px}
+.p-20{padding:20px 22px}.p-22{padding:22px 24px}
+.ovh{overflow:hidden}.pointer{cursor:pointer}
+.text-xs{font-size:11px}.text-sm{font-size:13px}.text-base{font-size:14px}.text-lg{font-size:15px}
+.font-6{font-weight:600}.font-7{font-weight:700}.font-8{font-weight:800}
+.text-muted{color:var(--t4)}.text-2{color:var(--t2)}.text-dark{color:var(--t1)}
+.nowrap{white-space:nowrap}.lh-14{line-height:1.4}
+.hint-box{font-size:11px;color:var(--t4);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;margin-bottom:16px}
+.section-label{font-size:11px;font-weight:700;color:var(--t4);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ──────────────────────────────────────────────────
+// COMPLETE DATA
+// ──────────────────────────────────────────────────
+const QUARTERS=[
+  {id:'Q1.1',label:'Q1.1',color:'#E05525',name:'Fundamentação e Estruturação Básica',period:'Junho – Agosto 2026',phases:[
+    {id:'P01',num:'01',name:'Diagnóstico e Alinhamento Estratégico',responsible:'Gestor(a) de RH',
+     participants:['Liderança Executiva','Gestores de Tecnologia e CS','Equipe de TI','Colaboradores Chave'],
+     marcos:['Compreensão aprofundada da cultura e processos atuais','Benefícios PJ organizados e comunicados','Base documental essencial estabelecida e acessível','Estrutura inicial do RH definida'],
+     kpis:[{id:'P01-k0',text:'% de gestores entrevistados',type:'percent',target:100},{id:'P01-k1',text:'% de VMMV e Manifesto Cultural aprovados pela liderança',type:'percent',target:100},{id:'P01-k2',text:'% de políticas essenciais criadas e aprovadas',type:'percent',target:100},{id:'P01-k3',text:'Repositório ativo com 100% dos documentos iniciais migrados',type:'binary'},{id:'P01-k4',text:'Estrutura do RH definida e comunicada internamente',type:'binary'},{id:'P01-k5',text:'PDI inicial para o RH em andamento',type:'binary'}],
+     goals:['Concluir o diagnóstico e mapeamento de processos em 100%','Criar e aprovar 3 políticas essenciais','Implementar o repositório de cultura e migrar 100% dos documentos existentes','Definir a estrutura e iniciar o PDI do RH'],
+     items:[
+      {id:'1.1',name:'Mapeamento de Processos de RH Atuais',wr:'Sem. 1–3',period:'Junho',ws:1,we:3,desc:'Entrevistas com gestores, levantamento de processos informais, análise cultural.',bullets:['Entrevistas aprofundadas com gestores de Tecnologia e CS para entender desafios, expectativas e percepções','Levantamento de processos informais de contratação, desligamento, comunicação e gestão de benefícios','Análise de documentos culturais existentes','Levantamento de ferramentas de comunicação (Slack) e outras tecnologias']},
+      {id:'1.2',name:'Estruturação de Documentos Essenciais',wr:'Sem. 2–5',period:'Jun – Jul',ws:2,we:5,desc:'Código de Conduta, Políticas Fundamentais, Repositório Centralizado, Manual de Benefícios PJ.',bullets:['Criação do Código de Conduta e Ética da empresa','Políticas: Anticorrupção, Segurança da Informação, Uso de Recursos da Empresa','Guia de Boas Práticas para o Slack (etiqueta, canais, performance)','Repositório Centralizado de Documentos — Google Drive, SharePoint ou Notion','Migração dos documentos existentes para o repositório','Levantamento e mapeamento de todos os benefícios PJ','Criação do Espaço Cultura LET\'S — regras, elegibilidade e como utilizar','Comunicação do Manual de Benefícios aos colaboradores']},
+      {id:'1.3',name:'Estruturação do Setor de RH',wr:'Sem. 2–4',period:'Junho',ws:2,we:4,desc:'Estrutura organizacional, competências, base integrada ao Claude.',bullets:['Definição da estrutura organizacional do RH (funções e responsabilidades)','Mapeamento das competências necessárias para o time de RH','Criação da base de gestão de pessoas integrada ao Claude','Melhoria da ficha de registro LET\'S']}
+    ]},
+    {id:'P02',num:'02',name:'Onboarding e Integração',responsible:'Gestor(a) de RH',
+     participants:['Gestores de Tecnologia e CS','Novos Colaboradores','Financeiro'],
+     marcos:['Programa de Onboarding estruturado e piloto realizado','Integração entre times iniciada','VMMV formalizados e comunicados'],
+     kpis:[{id:'P02-k0',text:'% de novos colaboradores pelo onboarding piloto',type:'percent',target:100},{id:'P02-k1',text:'% de colaboradores que acessaram o Manual de Benefícios',type:'percent',target:null},{id:'P02-k2',text:'Feedback positivo dos participantes do piloto',type:'binary'},{id:'P02-k3',text:'Início de iniciativas de integração entre times',type:'binary'}],
+     goals:['Desenvolver e testar o programa de onboarding','Iniciar a estrutura de VMMV'],
+     items:[
+      {id:'2.1',name:'Desenvolvimento do Programa de Onboarding',wr:'Sem. 5–6',period:'Julho',ws:5,we:6,desc:'Roteiro pré-boarding → 1º mês, kit de boas-vindas digital.',bullets:['Criação de roteiro de onboarding (pré-boarding, 1º dia, 1ª semana, 1º mês)','Conteúdo: cultura, VMMV, políticas, apresentação da empresa, áreas e ferramentas','Desenvolvimento de kit de boas-vindas digital']},
+      {id:'2.2',name:'Integração entre Times',wr:'Sem. 6–8',period:'Julho',ws:6,we:8,desc:'Café com o Líder, Shadowing, projetos interdepartamentais.',bullets:['Mapeamento de pontos de contato entre Tecnologia e CS','Iniciativas: Café com o Líder, Shadowing entre áreas','Projetos interdepartamentais para aproximar times']},
+      {id:'2.3',name:'Formalização de VMMV e Cultura',wr:'Sem. 5–7',period:'Julho',ws:5,we:7,desc:'Workshops de co-criação com liderança, Manifesto Cultural.',bullets:['Workshops com a liderança para co-criação da Visão, Missão e Valores','Definição de quem queremos ser como cultura','Elaboração de Manifesto Cultural ou Princípios de Cultura']}
+    ]},
+    {id:'P03',num:'03',name:'Base de Gestão de Pessoas e IA',responsible:'Gestor(a) de RH',
+     participants:['Equipe de TI','Liderança Executiva','Gestores de Tecnologia e CS'],
+     marcos:['Base de Gestão de Pessoas implementada','IA integrada na gestão de documentos','Desenho inicial de níveis hierárquicos e autonomia'],
+     kpis:[{id:'P03-k0',text:'HRIS/Cloud com dados de 100% dos colaboradores',type:'percent',target:100},{id:'P03-k1',text:'Ferramenta de IA para documentos configurada e em uso pelo RH',type:'binary'},{id:'P03-k2',text:'Esboço de níveis hierárquicos e autonomia para Tecnologia e CS',type:'binary'},{id:'P03-k3',text:'Feedback positivo do RH sobre a ferramenta de IA',type:'binary'}],
+     goals:['Implementar a Base de Gestão de Pessoas (Cloud)','Integrar IA na gestão de documentos','Apresentar desenho inicial de níveis para validação'],
+     items:[
+      {id:'3.1',name:'Implementação da Base de Gestão de Pessoas',wr:'Sem. 6–9',period:'Jul – Ago',ws:6,we:9,desc:'HRIS / plataforma Cloud, migração de dados, perfis de acesso.',bullets:['HRIS (BambooHR, Sólides) ou plataforma Cloud (Notion/Airtable) para colaboradores PJ','Migração inicial de dados','Perfis de acesso e segurança']},
+      {id:'3.2',name:'Integração de IA na Gestão de Documentos',wr:'Sem. 9–11',period:'Agosto',ws:9,we:11,desc:'Categorização automática, busca inteligente, sumarização.',bullets:['IA para categorização automática de documentos','Busca inteligente por palavras-chave e conteúdo','Sumarização de políticas com IA','Treinamento da equipe de RH']},
+      {id:'3.3',name:'Desenho Inicial de Níveis Hierárquicos e Autonomia',wr:'Sem. 10–12',period:'Agosto',ws:10,we:12,desc:'Estrutura Júnior → Liderança, indicadores de autonomia.',bullets:['Mapeamento das principais funções e responsabilidades','Estrutura de níveis: Júnior, Pleno, Sênior, Especialista, Liderança','Indicadores de autonomia esperada para cada nível']}
+    ]}
+  ]},
+  {id:'Q1.2',label:'Q1.2',color:'#C026D3',name:'Desenvolvimento de Lideranças e Performance',period:'Agosto – Outubro 2026',phases:[
+    {id:'P04',num:'04',name:'Capacitação de Lideranças',responsible:'Gestor(a) de RH',
+     participants:['Gestores de Tecnologia e CS','Liderança Executiva','Colaboradores'],
+     marcos:['PDL iniciado','Cultura de feedback contínuo implementada'],
+     kpis:[{id:'P04-k0',text:'% de gestores nos módulos iniciais do PDL',type:'percent',target:80},{id:'P04-k1',text:'% de colaboradores no treinamento de feedback',type:'percent',target:70},{id:'P04-k2',text:'Taxa de adesão aos Check-ins de Feedback',type:'percent',target:60},{id:'P04-k3',text:'Feedback positivo dos gestores sobre o PDL',type:'binary'}],
+     goals:['Iniciar o PDL com 2 módulos','Treinar 70% dos colaboradores em feedback','Implementar ferramenta de registro de feedback'],
+     items:[
+      {id:'4.1',name:'Lançamento do PDL — Programa de Desenvolvimento de Lideranças',wr:'Sem. 11–13',period:'Agosto',ws:11,we:13,desc:'Módulos de liderança, feedback construtivo e alta performance.',bullets:['Módulo Liderança Essencial: comunicação, delegação, gestão de conflitos','Módulo Feedback Construtivo: dar e receber feedback estruturado','Módulo Gestão de Equipes de Alta Performance','Workshops presenciais ou online','Guia para gestores sobre como aplicar os aprendizados']},
+      {id:'4.2',name:'Implementação da Cultura de Feedback',wr:'Sem. 12–13',period:'Agosto',ws:12,we:13,desc:'Treinamento, check-ins mensais/quinzenais, ferramenta de registro.',bullets:['Treinamento para todos os colaboradores sobre dar/receber feedback','Modelo de Check-in de Feedback mensal ou quinzenal','Ferramenta para registro de feedback (módulo HRIS ou dedicada)']}
+    ]},
+    {id:'P05',num:'05',name:'Gestão de Performance e PDI',responsible:'Gestor(a) de RH',
+     participants:['Gestores de Tecnologia e CS','Colaboradores','Liderança Executiva'],
+     marcos:['Ciclo de Avaliação de Desempenho concluído','PDIs formalizados','Política de Retenção em desenvolvimento'],
+     kpis:[{id:'P05-k0',text:'% de colaboradores com avaliação de desempenho concluída',type:'percent',target:100},{id:'P05-k1',text:'% de colaboradores com PDI formalizado',type:'percent',target:90},{id:'P05-k2',text:'Rascunho da Política de Retenção elaborado',type:'binary'},{id:'P05-k3',text:'Feedback dos colaboradores sobre o processo de avaliação',type:'binary'}],
+     goals:['Concluir o 1º ciclo de avaliação','90% dos colaboradores com PDI','Apresentar rascunho da Política de Retenção à liderança'],
+     items:[
+      {id:'5.1',name:'Implementação da Avaliação de Desempenho',wr:'Sem. 14–16',period:'Setembro',ws:14,we:16,desc:'Critérios, formulário, treinamento, 1º ciclo.',bullets:['Critérios de avaliação alinhados aos VMMV','Formulário de avaliação (HRIS ou ferramenta específica)','Treinamento para gestores sobre avaliação e feedback','Realização do 1º ciclo gestor-colaborador']},
+      {id:'5.2',name:'Formalização de PDIs',wr:'Sem. 16–17',period:'Setembro',ws:16,we:17,desc:'PDIs baseados em avaliações, ferramenta de acompanhamento.',bullets:['Orientação para criação de PDIs baseados nos resultados','Alinhamento com objetivos de carreira individuais','Ferramenta para acompanhamento dos PDIs (HRIS)']},
+      {id:'5.3',name:'Desenvolvimento da Política de Retenção',wr:'Sem. 14–16',period:'Setembro',ws:14,we:16,desc:'Pesquisa, brainstorming com liderança, elaboração.',bullets:['Pesquisa de mercado sobre retenção para PJs','Brainstorming com liderança sobre fatores de retenção','Elaboração da Política de Retenção']}
+    ]},
+    {id:'P06',num:'06',name:'Estrutura de Cargos e Fluxos',responsible:'Gestor(a) de RH',
+     participants:['Liderança Executiva','Gestores de Tecnologia e CS','Financeiro','Jurídico','Equipe de TI'],
+     marcos:['Estrutura de Cargos e Salários PJ definida','Sistema de Contratos implementado','Fluxo de aprovação de cadeiras desenhado'],
+     kpis:[{id:'P06-k0',text:'Estrutura de Cargos e Salários PJ aprovada pela liderança',type:'binary'},{id:'P06-k1',text:'Sistema de contratos com 100% dos contratos migrados',type:'percent',target:100},{id:'P06-k2',text:'Feedback dos gestores sobre a clareza da estrutura de cargos',type:'binary'}],
+     goals:['Definir e comunicar Estrutura de Cargos PJ','Implementar sistema de gestão de contratos','Desenhar e comunicar fluxo de aprovação de cadeiras'],
+     items:[
+      {id:'6.1',name:'Estrutura de Cargos e Salários PJ',wr:'Sem. 15–18',period:'Set – Out',ws:15,we:18,desc:'Mapeamento, descrições, benchmarking PJ, grades, análise CLT x PJ.',bullets:['Mapeamento detalhado de cargos e funções','Descrições de cargos: responsabilidades, requisitos, competências','Benchmarking de remuneração PJ','Tabela de remuneração por nível/cargo/grades','Análise CLT x PJ','Comunicação da estrutura aos gestores']},
+      {id:'6.2',name:'Sistema de Gestão de Contratos PJ',wr:'Sem. 18–20',period:'Outubro',ws:18,we:20,desc:'Ferramenta, migração, alertas de vencimento.',bullets:['Ferramenta para controle de contratos PJ (HRIS ou dedicada)','Migração de todos os contratos existentes','Alertas para vencimento de contratos']},
+      {id:'6.3',name:'Fluxo de Aprovação de Cadeiras',wr:'Sem. 19–20',period:'Outubro',ws:19,we:20,desc:'Fluxo formal: Requisição → Análise RH → Financeiro → Executivo.',bullets:['Mapeamento do processo atual de solicitação de vagas','Fluxo: Requisição → Análise RH → Aprovação Financeira → Aprovação Executiva','Formulário padronizado','Comunicação do fluxo aos gestores']}
+    ]}
+  ]},
+  {id:'T1.1',label:'T1.1',color:'#7C3AED',name:'Cultura de Desenvolvimento e Engajamento',period:'Outubro – Novembro 2026',phases:[
+    {id:'P07',num:'07',name:'Avaliação 360° e Desenvolvimento Contínuo',responsible:'Gestor(a) de RH',
+     participants:['Gestores de Tecnologia e CS','Colaboradores','Liderança Executiva'],
+     marcos:['Ciclo de Avaliação 360° concluído','Programas de desenvolvimento em andamento'],
+     kpis:[{id:'P07-k0',text:'% de colaboradores na Avaliação 360°',type:'percent',target:80},{id:'P07-k1',text:'% de colaboradores com plano de ação pós-360°',type:'percent',target:null},{id:'P07-k2',text:'% de participação nos workshops/treinamentos',type:'percent',target:null},{id:'P07-k3',text:'Feedback positivo sobre a relevância dos programas',type:'binary'}],
+     goals:['Concluir o 1º ciclo de Avaliação 360°','Lançar 2 programas de desenvolvimento','Criar a biblioteca de recursos'],
+     items:[
+      {id:'7.1',name:'Implementação da Avaliação 360°',wr:'Sem. 19–21',period:'Outubro',ws:19,we:21,desc:'Competências, ferramenta, treinamento, 1º ciclo, devolutivas.',bullets:['Competências avaliadas alinhadas aos VMMV','Ferramenta para Avaliação 360° (HRIS ou dedicada)','Treinamento para gestores e colaboradores','Realização do 1º ciclo','Sessões de devolutiva']},
+      {id:'7.2',name:'Programas de Desenvolvimento Contínuo',wr:'Sem. 20–22',period:'Out – Nov',ws:20,we:22,desc:'Workshops, mentoria interna, biblioteca de recursos.',bullets:['Workshops baseados nas lacunas identificadas','Mentoria interna ou coaching','Biblioteca de recursos (cursos online, artigos, livros)']}
+    ]},
+    {id:'P08',num:'08',name:'Gestão de Talentos e Desligamento',responsible:'Gestor(a) de RH',
+     participants:['Liderança Executiva','Gestores de Tecnologia e CS','Jurídico','Financeiro'],
+     marcos:['Política de Desligamento estruturada','Mapeamento de Talentos iniciado','Fluxo de desligamento desenhado'],
+     kpis:[{id:'P08-k0',text:'Política de Desligamento aprovada e comunicada',type:'binary'},{id:'P08-k1',text:'% de gestores treinados em desligamento',type:'percent',target:null},{id:'P08-k2',text:'Mapeamento de talentos chave iniciado',type:'binary'},{id:'P08-k3',text:'Fluxo de aprovação documentado e comunicado',type:'binary'},{id:'P08-k4',text:'Taxa de preenchimento de entrevistas de saída',type:'percent',target:80}],
+     goals:['Formalizar Política de Desligamento','Iniciar mapeamento de talentos e sucessão','Desenhar fluxo de aprovação de desligamento'],
+     items:[
+      {id:'8.1',name:'Política de Desligamento',wr:'Sem. 22–23',period:'Novembro',ws:22,we:23,desc:'Política humanizada, treinamento, entrevista de saída.',bullets:['Política humanizada e transparente','Treinamento para gestores sobre desligamento','Formulário de entrevista de saída','Comunicação da política']},
+      {id:'8.2',name:'Mapeamento de Talentos e Sucessão',wr:'Sem. 23–25',period:'Novembro',ws:23,we:25,desc:'Posições críticas, Nine Box Grid, planejamento de sucessão.',bullets:['Identificação de posições críticas e talentos chave','Nine Box Grid para avaliar potencial e performance','Planejamento de sucessão para posições estratégicas']},
+      {id:'8.3',name:'Fluxo de Aprovação de Desligamento',wr:'Sem. 22–24',period:'Novembro',ws:22,we:24,desc:'Fluxo: Gestor → RH → Liderança → Jurídico → Financeiro.',bullets:['Mapeamento do processo atual','Fluxo formal com todos os aprovadores','Formulário padronizado','Comunicação do fluxo']}
+    ]},
+    {id:'P09',num:'09',name:'Clima e Comunicação Interna',responsible:'Gestor(a) de RH',
+     participants:['Liderança Executiva','Gestores de Tecnologia e CS','Colaboradores','Equipe de Marketing/Comunicação'],
+     marcos:['Pesquisa de Clima realizada','Plano de Ação em andamento','Comunicação interna fortalecida'],
+     kpis:[{id:'P09-k0',text:'% de participação na pesquisa de clima',type:'percent',target:80},{id:'P09-k1',text:'Plano de ação de clima elaborado e comunicado',type:'binary'},{id:'P09-k2',text:'% de ações do plano de clima iniciadas',type:'percent',target:null},{id:'P09-k3',text:'Feedback positivo sobre a transparência dos resultados',type:'binary'},{id:'P09-k4',text:'Ferramenta de IA para análise de sentimento em teste',type:'binary'}],
+     goals:['Pesquisa de clima com 80% de participação','Elaborar e comunicar plano de ação','Lançar newsletter interna','Iniciar IA na comunicação interna'],
+     items:[
+      {id:'9.1',name:'Pesquisa de Clima Organizacional',wr:'Sem. 22–24',period:'Novembro',ws:22,we:24,desc:'Ferramenta, perguntas sobre engajamento/liderança, coleta e análise.',bullets:['Ferramenta para pesquisa de clima (SurveyMonkey, Typeform)','Perguntas sobre engajamento, liderança, cultura, ambiente e benefícios','Coleta de dados e análise de resultados','Elaboração de relatório']},
+      {id:'9.2',name:'Plano de Ação Pós-Pesquisa de Clima',wr:'Sem. 24–25',period:'Novembro',ws:24,we:25,desc:'Apresentação de resultados, plano de ação, grupos de trabalho.',bullets:['Apresentação transparente à liderança e colaboradores','Plano de ação para pontos de melhoria','Grupos de trabalho para implementar as ações']},
+      {id:'9.3',name:'Fortalecimento da Comunicação Interna',wr:'Sem. 23–25',period:'Novembro',ws:23,we:25,desc:'Calendário editorial, Newsletter, IA para análise de sentimento.',bullets:['Avaliação dos canais de comunicação existentes','Calendário editorial interno','Newsletter Interna ou canal de notícias','IA para análise de sentimento no Slack']}
+    ]}
+  ]},
+  {id:'T1.2',label:'T1.2',color:'#0D9488',name:'Otimização, Inovação e Sustentabilidade',period:'Dezembro 2026',phases:[
+    {id:'P10',num:'10',name:'Otimização de Processos e IA',responsible:'Gestor(a) de RH',
+     participants:['Equipe de TI','Gestores de Tecnologia e CS','Liderança Executiva'],
+     marcos:['Processos otimizados e automatizados','IA em R&S implementada','Centralização aprimorada com IA'],
+     kpis:[{id:'P10-k0',text:'% de processos de RH com automação implementada',type:'percent',target:30},{id:'P10-k1',text:'Ferramenta de IA para R&S em uso',type:'binary'},{id:'P10-k2',text:'Funcionalidades avançadas de IA no repositório ativas',type:'binary'},{id:'P10-k3',text:'Redução do tempo médio de triagem de currículos',type:'binary'},{id:'P10-k4',text:'Feedback positivo do RH sobre eficiência das automações',type:'binary'}],
+     goals:['Automatizar 30% dos processos de RH','Implementar IA em R&S','Aprimorar centralização com IA'],
+     items:[
+      {id:'10.1',name:'Otimização e Automação de Processos de RH',wr:'Sem. 26–27',period:'Dezembro',ws:26,we:27,desc:'Revisão de processos, gargalos, automações.',bullets:['Revisão de todos os processos implementados','Identificação de gargalos e oportunidades de automação','Automações: e-mails, workflows, integrações entre sistemas']},
+      {id:'10.2',name:'Integração de IA em Recrutamento e Seleção',wr:'Sem. 26–27',period:'Dezembro',ws:26,we:27,desc:'Triagem por IA, análise de perfis, chatbots.',bullets:['IA para triagem de currículos','Análise de perfil de candidatos','Chatbots para candidatos e FAQ','Treinamento do RH']},
+      {id:'10.3',name:'Centralização de Informações com IA Avançada',wr:'Sem. 26–28',period:'Dezembro',ws:26,we:28,desc:'Busca semântica, sumarização automática, relatórios.',bullets:['Busca semântica no repositório Cloud','Sumarização automática de documentos','Geração de relatórios e insights com IA']}
+    ]},
+    {id:'P11',num:'11',name:'Avaliação de Liderança e Reconhecimento',responsible:'Gestor(a) de RH',
+     participants:['Liderança Executiva','Gestores de Tecnologia e CS','Colaboradores','Financeiro'],
+     marcos:['Política de Avaliação do Gestor implementada'],
+     kpis:[{id:'P11-k0',text:'% de gestores avaliados pelos colaboradores',type:'percent',target:90}],
+     goals:['Implementar a Política de Avaliação do Gestor'],
+     items:[
+      {id:'11.1',name:'Política de Avaliação do Gestor pelos Colaboradores',wr:'Sem. 26–27',period:'Dezembro',ws:26,we:27,desc:'Critérios, ferramenta, 1º ciclo, devolutivas.',bullets:['Critérios: liderança, comunicação, desenvolvimento, feedback','Ferramenta (HRIS ou dedicada)','Lançamento do 1º ciclo','Sessões de devolutiva e planos de desenvolvimento']}
+    ]},
+    {id:'P12',num:'12',name:'Planejamento Estratégico e Sustentabilidade',responsible:'Gestor(a) de RH',
+     participants:['Liderança Executiva','Gestores de Tecnologia e CS','Equipe de TI','Financeiro'],
+     marcos:['Planejamento Estratégico de RH para o próximo ano','Dashboard de KPIs consolidado','Base de Gestão de Pessoas completa'],
+     kpis:[{id:'P12-k0',text:'Plano Estratégico de RH para o próximo ano aprovado',type:'binary'},{id:'P12-k1',text:'Dashboard de KPIs atualizado e apresentado mensalmente',type:'binary'},{id:'P12-k2',text:'HRIS/Cloud com 100% dos dados e funcionalidades ativas',type:'binary'},{id:'P12-k3',text:'Feedback positivo da liderança sobre a contribuição do RH',type:'binary'}],
+     goals:['Apresentar o Plano Estratégico de RH','Consolidar e apresentar dashboard de KPIs','Garantir plena funcionalidade do HRIS (Cloud)'],
+     items:[
+      {id:'12.1',name:'Planejamento Estratégico de RH Anual',wr:'Sem. 28',period:'Dezembro',ws:28,we:28,desc:'Revisão dos resultados, objetivos, metas, orçamento.',bullets:['Revisão dos resultados do ano','Objetivos e metas para o próximo ciclo','Orçamento de RH para o próximo ano']},
+      {id:'12.2',name:'Dashboard de Indicadores de RH (KPIs)',wr:'Sem. 28',period:'Dezembro',ws:28,we:28,desc:'Dashboard completo no HRIS/Power BI, apresentação à liderança.',bullets:['Dashboard completo de KPIs (HRIS, Power BI ou outra ferramenta)','Apresentação regular dos resultados à liderança']},
+      {id:'12.3',name:'Base de Gestão de Pessoas (Cloud) Completa',wr:'Sem. 28',period:'Dezembro',ws:28,we:28,desc:'HRIS totalmente funcional, dados migrados, IA otimizada.',bullets:['HRIS totalmente funcional','100% dos dados migrados e processos integrados','Documentação completa de todos os processos']}
+    ]}
+  ]}
 ];
 
-// ─── constants ───────────────────────────────────────────────
-const STORAGE_KEY = "lets-rh-impl-2026-v2";
-const ST = {
-  pending:     { label:"Pendente",      color:"#B45309", bg:"#FFFBEB", ring:"#FDE68A", dot:"#F59E0B" },
-  in_progress: { label:"Em Andamento",  color:"#C2410C", bg:"#FFF7ED", ring:"#FDBA74", dot:"#FF5A1A" },
-  done:        { label:"Concluído",     color:"#065F46", bg:"#ECFDF5", ring:"#6EE7B7", dot:"#059669" },
+// STATUS CONFIG
+const ST_CFG={
+  pending:    {label:'Pendente',    color:'#A05800',bg:'#FFF8EC',ring:'#F0C878',dot:'#D08020'},
+  in_progress:{label:'Em Andamento',color:'#C04020',bg:'#FEF2EE',ring:'#F8B0A0',dot:'#E05525'},
+  done:       {label:'Concluído',   color:'#0A7055',bg:'#EAFAF5',ring:'#80D8B8',dot:'#12A068'}
 };
-const ST_ORDER = ["pending","in_progress","done"];
-const getSt   = (sts,id) => sts[id]?.status || "pending";
-const getDate = (sts,id) => sts[id]?.completedAt || "";
-const allItems = () => QUARTERS.flatMap(q=>q.phases.flatMap(p=>p.items));
+const ST_ORDER=['pending','in_progress','done'];
+const STORAGE_KEY='lets-rh-2026';
+const KPI_KEY='lets-rh-2026-kpis';
 
-// ─── helpers ─────────────────────────────────────────────────
-function ProgressBar({value,color,height=6,bg="#E5EAF2"}){
-  return(
-    <div style={{background:bg,borderRadius:99,height,overflow:"hidden"}}>
-      <div style={{height:"100%",borderRadius:99,width:`${value}%`,background:color,transition:"width .4s ease"}}/>
-    </div>
-  );
+// STATE
+const S={
+  tab:'dashboard',
+  taskSts:{},
+  kpiVals:{},
+  openPhases:{},openDetails:{},openTasks:{},
+  filters:{q:'all',st:'all',search:'',detailQ:'all',kpiQ:'all'}
+};
+function loadState(){
+  try{const v=localStorage.getItem(STORAGE_KEY);if(v)S.taskSts=JSON.parse(v);}catch{}
+  try{const v=localStorage.getItem(KPI_KEY);if(v)S.kpiVals=JSON.parse(v);}catch{}
 }
+function saveTasks(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(S.taskSts));}catch{}}
+function saveKpis(){try{localStorage.setItem(KPI_KEY,JSON.stringify(S.kpiVals));}catch{}}
 
-function Chip({label,color,bg,border}){
-  return(
-    <span style={{display:"inline-flex",alignItems:"center",fontSize:11,fontWeight:600,
-      color,background:bg,border:`1px solid ${border||color+"40"}`,borderRadius:20,
-      padding:"3px 10px",letterSpacing:"0.03em",lineHeight:1,whiteSpace:"nowrap"}}>
-      {label}
-    </span>
-  );
+function getSt(id){return S.taskSts[id]?.status||'pending';}
+function getDate(id){return S.taskSts[id]?.completedAt||'';}
+function allItems(){return QUARTERS.flatMap(q=>q.phases.flatMap(p=>p.items));}
+function allKpis(){return QUARTERS.flatMap(q=>q.phases.flatMap(p=>p.kpis));}
+function getKpiVal(id){return S.kpiVals[id]?.value??0;}
+function getKpiAchieved(id){return S.kpiVals[id]?.achieved??false;}
+function isKpiOk(kpi){
+  if(kpi.type==='binary')return getKpiAchieved(kpi.id);
+  const v=getKpiVal(kpi.id);
+  return kpi.target?v>=kpi.target:v>0;
 }
-
-function StatusBtn({status,onClick}){
-  const s=ST[status];
-  return(
-    <button onClick={onClick} style={{display:"inline-flex",alignItems:"center",gap:5,
-      padding:"4px 11px",borderRadius:20,border:`1px solid ${s.ring}`,
-      background:s.bg,color:s.color,fontSize:11,fontWeight:600,cursor:"pointer",
-      fontFamily:"inherit",letterSpacing:"0.03em",whiteSpace:"nowrap",
-      transition:"all .15s",lineHeight:1}}>
-      <span style={{width:6,height:6,borderRadius:"50%",background:s.dot,flexShrink:0}}/>
-      {s.label}
-    </button>
-  );
+function cycleStatus(id){
+  const cur=getSt(id),nxt=ST_ORDER[(ST_ORDER.indexOf(cur)+1)%ST_ORDER.length];
+  const completedAt=nxt==='done'?new Date().toISOString().split('T')[0]:nxt==='pending'?null:getDate(id);
+  S.taskSts[id]={status:nxt,completedAt};saveTasks();
 }
+function setDateFn(id,val){S.taskSts[id]={...(S.taskSts[id]||{status:'pending'}),completedAt:val};saveTasks();}
 
-// ─── STAT CARD ───────────────────────────────────────────────
-function StatCard({label,value,color,sub}){
-  return(
-    <div style={{background:"#FFF",border:"1px solid #E5EAF2",borderRadius:14,padding:"20px 22px",
-      boxShadow:"0 1px 4px rgba(0,0,0,.04)",borderTop:`3px solid ${color}`}}>
-      <div style={{fontSize:11,fontWeight:700,color:"#9DAFBF",letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:6}}>{label}</div>
-      <div style={{fontSize:36,fontWeight:800,color,lineHeight:1,marginBottom:4}}>{value}</div>
-      {sub&&<div style={{fontSize:12,color:"#9DAFBF"}}>{sub}</div>}
-    </div>
-  );
-}
+// HELPERS
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function chip(label,color,bg,border){border=border||color+'40';bg=bg||color+'15';return`<span class="chip" style="color:${color};background:${bg};border-color:${border}">${esc(label)}</span>`;}
+function pbar(pct,color,h=6,bg='#E8F0F8'){return`<div class="pbar-wrap" style="height:${h}px;background:${bg}"><div class="pbar-fill" style="height:${h}px;width:${Math.min(pct,100)}%;background:${color}"></div></div>`;}
+function statusBtn(id,status){const s=ST_CFG[status];return`<button class="status-btn" data-action="cycle" data-id="${id}" style="color:${s.color};background:${s.bg};border-color:${s.ring}"><span style="width:6px;height:6px;border-radius:50%;background:${s.dot};display:inline-block;flex-shrink:0"></span>&nbsp;${s.label}</button>`;}
 
-// ─── QUARTER PROGRESS CARD ───────────────────────────────────
-function QCard({q,sts}){
-  const all=q.phases.flatMap(p=>p.items);
-  const done=all.filter(i=>getSt(sts,i.id)==="done").length;
-  const ip=all.filter(i=>getSt(sts,i.id)==="in_progress").length;
-  const pct=Math.round((done/all.length)*100);
-  return(
-    <div style={{background:"#FFF",border:"1px solid #E5EAF2",borderRadius:14,padding:"20px 22px",
-      boxShadow:"0 1px 4px rgba(0,0,0,.04)",borderLeft:`4px solid ${q.color}`}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
-        <div>
-          <div style={{marginBottom:6}}><Chip label={q.label} color={q.color} bg={q.color+"15"} border={q.color+"40"}/></div>
-          <div style={{fontSize:13,fontWeight:600,color:"#1E293B",lineHeight:1.4,maxWidth:260}}>{q.name}</div>
-          <div style={{fontSize:11,color:"#94A3B8",marginTop:3}}>{q.period}</div>
-        </div>
-        <div style={{textAlign:"right",flexShrink:0}}>
-          <div style={{fontSize:30,fontWeight:800,color:q.color,lineHeight:1}}>{pct}%</div>
-          <div style={{fontSize:11,color:"#94A3B8"}}>{done}/{all.length} entregas</div>
-        </div>
+// ──────── HEADER ────────
+function renderHeader(){
+  const all=allItems(),done=all.filter(i=>getSt(i.id)==='done').length,ip=all.filter(i=>getSt(i.id)==='in_progress').length;
+  const pct=Math.round(done/all.length*100);
+  const ka=allKpis(),kDone=ka.filter(k=>isKpiOk(k)).length;
+  return`<header class="header">
+    <div class="flex items-center gap-12">
+      <div class="logo-mark">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 2.5H7V14H14.5V17H3.5V2.5Z" fill="white"/></svg>
       </div>
-      <ProgressBar value={pct} color={q.color} height={6}/>
-      <div style={{display:"flex",gap:14,marginTop:8,flexWrap:"wrap"}}>
-        {ip>0&&<span style={{fontSize:11,color:q.color,fontWeight:500}}>● {ip} em andamento</span>}
-        {(all.length-done-ip)>0&&<span style={{fontSize:11,color:"#94A3B8"}}>● {all.length-done-ip} pendente{all.length-done-ip!==1?"s":""}</span>}
-        {done===all.length&&<span style={{fontSize:11,color:"#059669",fontWeight:500}}>✓ Todas concluídas</span>}
+      <div class="logo-wordmark">
+        <div class="logo-top">LET<span class="org">'S</span><span class="div">RH</span></div>
+        <div class="logo-sub">IMPLEMENTAÇÃO 2026</div>
       </div>
     </div>
-  );
+    <div class="hdivider"></div>
+    <div class="h-stats">
+      <div class="h-stat"><span class="h-stat-n" style="color:#2060D0">${all.length}</span><span class="h-stat-l">Entregas</span></div>
+      <div class="h-stat"><span class="h-stat-n" style="color:#12A068">${done}</span><span class="h-stat-l">Concluídas</span></div>
+      <div class="h-stat"><span class="h-stat-n" style="color:#E05525">${ip}</span><span class="h-stat-l">Em Andamento</span></div>
+      <div class="h-stat"><span class="h-stat-n" style="color:#D08020">${all.length-done-ip}</span><span class="h-stat-l">Pendentes</span></div>
+      <div class="hdivider" style="height:28px"></div>
+      <div class="h-stat"><span class="h-stat-n" style="color:#7C3AED">${kDone}</span><span class="h-stat-l">KPIs atingidos</span></div>
+      <div class="h-stat"><span class="h-stat-n" style="color:#90AABF">${ka.length}</span><span class="h-stat-l">total KPIs</span></div>
+    </div>
+    <div class="h-right">
+      <div class="h-pct"><div class="h-pct-label">ENTREGAS</div><div class="h-pct-num">${pct}%</div></div>
+      <div style="width:90px">${pbar(pct,'#E05525',7)}</div>
+    </div>
+  </header>`;
 }
 
-// ─── DASHBOARD VIEW ──────────────────────────────────────────
-function DashboardView({sts}){
-  const all=allItems();
-  const done=all.filter(i=>getSt(sts,i.id)==="done").length;
-  const ip=all.filter(i=>getSt(sts,i.id)==="in_progress").length;
-  const pending=all.length-done-ip;
-  const pct=Math.round((done/all.length)*100);
-  const upcoming=all.filter(i=>getSt(sts,i.id)!=="done").sort((a,b)=>a.ws-b.ws).slice(0,6);
-  return(
-    <div style={{display:"flex",flexDirection:"column",gap:24}}>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14}}>
-        <StatCard label="Total de Entregas" value={all.length} color="#3B82F6" sub="micro-entregas mapeadas"/>
-        <StatCard label="Concluídas" value={done} color="#059669" sub={`${pct}% do total`}/>
-        <StatCard label="Em Andamento" value={ip} color="#FF5A1A" sub="em execução agora"/>
-        <StatCard label="Pendentes" value={pending} color="#D97706" sub="aguardando início"/>
+// ──────── NAV ────────
+function renderNav(){
+  const tabs=[['dashboard','Visão Geral'],['tasks','Tarefas'],['indicadores','Indicadores'],['details','Detalhes'],['timeline','Linha do Tempo']];
+  return`<nav class="nav">${tabs.map(([id,lbl])=>`<button class="tab-btn${S.tab===id?' active':''}" data-action="tab" data-id="${id}">${lbl}</button>`).join('')}</nav>`;
+}
+
+// ──────── DASHBOARD ────────
+function renderDashboard(){
+  const all=allItems(),done=all.filter(i=>getSt(i.id)==='done').length,ip=all.filter(i=>getSt(i.id)==='in_progress').length,pct=Math.round(done/all.length*100);
+  const ka=allKpis(),kDone=ka.filter(k=>isKpiOk(k)).length,kPct=Math.round(kDone/ka.length*100);
+  const upcoming=all.filter(i=>getSt(i.id)!=='done').sort((a,b)=>a.ws-b.ws).slice(0,5);
+
+  const statCards=[
+    ['Entregas',all.length,'#2060D0','micro-entregas mapeadas'],
+    ['Concluídas',done,'#12A068',pct+'% do total'],
+    ['Em Andamento',ip,'#E05525','em execução agora'],
+    ['KPIs Atingidos',kDone,'#7C3AED',kPct+'% dos '+ka.length+' indicadores']
+  ].map(([l,v,c,s])=>`<div class="card stat-card" style="border-top-color:${c}">
+    <div class="text-xs font-7 text-muted mb-6" style="letter-spacing:.06em;text-transform:uppercase">${l}</div>
+    <div style="font-size:34px;font-weight:800;color:${c};line-height:1;margin-bottom:4px">${v}</div>
+    <div class="text-xs text-muted">${s}</div>
+  </div>`).join('');
+
+  const qCards=QUARTERS.map(q=>{
+    const qi=q.phases.flatMap(p=>p.items),qd=qi.filter(i=>getSt(i.id)==='done').length,qip=qi.filter(i=>getSt(i.id)==='in_progress').length,qpct=Math.round(qd/qi.length*100);
+    const qk=q.phases.flatMap(p=>p.kpis),qkd=qk.filter(k=>isKpiOk(k)).length;
+    return`<div class="card p-20" style="border-left:4px solid ${q.color}">
+      <div class="flex justify-between items-start mb-12">
+        <div>${chip(q.label,q.color)}<div class="text-sm font-6 mt-6 lh-14" style="max-width:240px">${esc(q.name)}</div><div class="text-xs text-muted mt-3">${esc(q.period)}</div></div>
+        <div style="text-align:right;flex-shrink:0"><div style="font-size:28px;font-weight:800;color:${q.color};line-height:1">${qpct}%</div><div class="text-xs text-muted mt-2">${qd}/${qi.length} entregas</div><div class="text-xs text-muted" style="color:${q.color+'BB'}">${qkd}/${qk.length} KPIs</div></div>
       </div>
-      <div style={{background:"#FFF",border:"1px solid #E5EAF2",borderRadius:14,padding:"22px 24px",boxShadow:"0 1px 4px rgba(0,0,0,.04)"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <div>
-            <div style={{fontSize:13,fontWeight:700,color:"#1E293B"}}>Progresso Geral — Implementação RH 2026</div>
-            <div style={{fontSize:12,color:"#94A3B8",marginTop:2}}>Semanas 1–28 · Junho a Dezembro de 2026</div>
+      ${pbar(qpct,q.color,5)}
+      <div class="flex gap-14 mt-8 flex-wrap">
+        ${qip>0?`<span class="text-xs" style="color:${q.color};font-weight:500">● ${qip} em andamento</span>`:''}
+        ${qi.length-qd-qip>0?`<span class="text-xs text-muted">● ${qi.length-qd-qip} pendente(s)</span>`:''}
+        ${qd===qi.length?`<span class="text-xs" style="color:#12A068;font-weight:500">✓ Concluído</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  const upRows=upcoming.map((item,i)=>{
+    const qd=QUARTERS.find(q=>q.phases.some(p=>p.items.includes(item)));
+    const s=ST_CFG[getSt(item.id)];
+    return`<div class="flex items-center gap-12" style="padding:12px 20px;${i<upcoming.length-1?'border-bottom:1px solid #EEF4FA':''}">
+      ${chip(qd.label,qd.color,qd.color+'12',qd.color+'35')}
+      <span class="text-sm flex-1 nowrap" style="overflow:hidden;text-overflow:ellipsis;color:var(--t2)">${esc(item.name)}</span>
+      <span class="text-xs text-muted nowrap">${item.wr}</span>
+      <span class="chip text-xs" style="color:${s.color};background:${s.bg};border-color:${s.ring};font-weight:600">${s.label}</span>
+    </div>`;
+  }).join('');
+
+  return`<div class="flex-col gap-24">
+    <div class="grid-4">${statCards}</div>
+    <div class="card p-22">
+      <div class="flex justify-between items-center mb-14">
+        <div><div class="text-sm font-7">Progresso Geral — Implementação RH 2026</div><div class="text-xs text-muted mt-3">Semanas 1–28 · Junho a Dezembro de 2026</div></div>
+        <div style="font-size:36px;font-weight:800;color:var(--orange)">${pct}<span style="font-size:15px;color:var(--t4)">%</span></div>
+      </div>
+      ${pbar(pct,'var(--orange)',10)}
+      <div class="flex gap-20 mt-10 flex-wrap">
+        ${[['#12A068','Concluído',done],['#E05525','Em Andamento',ip],['#D08020','Pendente',all.length-done-ip]].map(([c,l,v])=>`<div class="flex items-center gap-6"><span style="width:7px;height:7px;border-radius:50%;background:${c};flex-shrink:0;display:inline-block"></span><span class="text-xs text-muted">${l}: <strong style="color:var(--t1)">${v}</strong></span></div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Progresso por Trimestre</div>
+      <div class="grid-2">${qCards}</div>
+    </div>
+    ${upcoming.length>0?`<div><div class="section-label">Próximas Entregas</div><div class="card ovh">${upRows}</div></div>`:''}
+  </div>`;
+}
+
+// ──────── TASKS ────────
+function renderTasks(){
+  const f=S.filters;
+  const filtered=QUARTERS.filter(q=>f.q==='all'||q.id===f.q).map(q=>({...q,phases:q.phases.map(p=>({...p,items:p.items.filter(i=>{
+    if(f.st!=='all'&&getSt(i.id)!==f.st)return false;
+    if(f.search&&!i.name.toLowerCase().includes(f.search.toLowerCase()))return false;
+    return true;
+  })})).filter(p=>p.items.length>0)})).filter(q=>q.phases.length>0);
+  const count=filtered.reduce((s,q)=>s+q.phases.reduce((ss,p)=>ss+p.items.length,0),0);
+  const SS='background:#FFF;border:1px solid var(--border);border-radius:8px;color:var(--t2);font-size:12px;padding:8px 12px;font-family:var(--font);outline:none';
+  const qOpts=QUARTERS.map(q=>`<option value="${q.id}"${f.q===q.id?' selected':''}>${q.label} — ${esc(q.name)}</option>`).join('');
+  const stOpts=Object.entries(ST_CFG).map(([k,v])=>`<option value="${k}"${f.st===k?' selected':''}>${v.label}</option>`).join('');
+  const sections=filtered.map(q=>{
+    const phases=q.phases.map(p=>{
+      const isOpen=S.openPhases[p.id]!==false;
+      const done=p.items.filter(i=>getSt(i.id)==='done').length,pct=Math.round(done/p.items.length*100);
+      const rows=p.items.map(item=>{
+        const st=getSt(item.id),dt=getDate(item.id),s=ST_CFG[st],isExp=S.openTasks[item.id];
+        return`<div class="task-row${st==='done'?' is-done':''}" id="row-${item.id}">
+          <div class="task-content">
+            <span class="chip" style="color:${q.color};background:${q.color}12;border-color:${q.color}35;font-size:10px;font-weight:700;flex-shrink:0">${item.id}</span>
+            <span class="text-sm flex-1 pointer" style="min-width:160px;color:${st==='done'?'var(--t4)':'var(--t1)'};${st==='done'?'text-decoration:line-through':''};line-height:1.4" data-action="toggle-task" data-id="${item.id}">${esc(item.name)}</span>
+            <span class="text-xs nowrap" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px 9px;color:var(--t3);flex-shrink:0">${item.wr} · ${item.period}</span>
+            ${statusBtn(item.id,st)}
+            <input type="date" class="date-input${dt?' has-date':''}" value="${dt}" data-action="set-date" data-id="${item.id}" title="Data de conclusão" style="${dt?'color:#C04020;border-color:#F8B0A0':''}"/>
           </div>
-          <div style={{fontSize:38,fontWeight:800,color:"#FF5A1A"}}>{pct}<span style={{fontSize:16,color:"#CBD5E1"}}>%</span></div>
+          <div class="task-desc-box${isExp?' open':''}">
+            <div style="font-size:12px;color:var(--t2);line-height:1.7;background:var(--surface2);border-radius:8px;padding:10px 14px;border:1px solid var(--border)">${esc(item.desc)}</div>
+          </div>
+        </div>`;
+      }).join('');
+      return`<div class="card ovh mb-10">
+        <div class="acc-header${isOpen?' open':''}" data-action="toggle-phase" data-id="${p.id}">
+          <span style="width:28px;height:28px;border-radius:8px;background:${q.color}15;border:1px solid ${q.color}40;color:${q.color};font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${p.num}</span>
+          <span class="text-base font-6 flex-1">${esc(p.name)}</span>
+          <span class="text-xs text-muted">${done}/${p.items.length}</span>
+          <div style="width:68px">${pbar(pct,q.color,4)}</div>
+          <span class="acc-arrow">›</span>
         </div>
-        <ProgressBar value={pct} color="#FF5A1A" height={10}/>
-        <div style={{display:"flex",gap:20,marginTop:12,flexWrap:"wrap"}}>
-          {[["#059669","Concluído",done],["#FF5A1A","Em Andamento",ip],["#D97706","Pendente",pending]].map(([c,l,v])=>(
-            <div key={l} style={{display:"flex",alignItems:"center",gap:6}}>
-              <span style={{width:8,height:8,borderRadius:"50%",background:c,flexShrink:0}}/>
-              <span style={{fontSize:12,color:"#64748B"}}>{l}: <strong style={{color:"#1E293B"}}>{v}</strong></span>
+        <div class="acc-body${isOpen?' open':''}">${rows}</div>
+      </div>`;
+    }).join('');
+    return`<div class="mb-10">
+      <div class="flex items-center gap-10 mb-10">${chip(q.label,q.color,q.color+'12',q.color+'40')}<span class="text-sm font-6 text-2">${esc(q.name)}</span><span class="text-xs text-muted">· ${esc(q.period)}</span></div>
+      ${phases}
+    </div>`;
+  }).join('');
+  return`<div>
+    <div class="filter-row">
+      <input type="text" class="finput" placeholder="🔍  Buscar entregável..." value="${esc(f.search)}" data-action="search" id="search-input" style="flex:1 1 200px;min-width:180px"/>
+      <select class="finput" data-action="filter-q" style="${SS}"><option value="all"${f.q==='all'?' selected':''}>Todos os trimestres</option>${qOpts}</select>
+      <select class="finput" data-action="filter-st" style="${SS}"><option value="all"${f.st==='all'?' selected':''}>Todos os status</option>${stOpts}</select>
+      <span class="text-xs text-muted nowrap">${count} entrega${count!==1?'s':''}</span>
+    </div>
+    <div class="hint-box">💡 Clique no nome para ver a descrição · Clique no badge de status para alterar · Preencha a data ao concluir</div>
+    ${sections||'<div style="text-align:center;color:var(--t4);padding:60px 20px">Nenhum resultado encontrado.</div>'}
+  </div>`;
+}
+
+// ──────── INDICADORES (KPI DASHBOARD) ────────
+function renderIndicadores(){
+  const fq=S.filters.kpiQ||'all';
+  const SS='background:#FFF;border:1px solid var(--border);border-radius:8px;color:var(--t2);font-size:12px;padding:8px 12px;font-family:var(--font);outline:none';
+  const qOpts=QUARTERS.map(q=>`<option value="${q.id}"${fq===q.id?' selected':''}>${q.label} — ${esc(q.name)}</option>`).join('');
+  const ka=allKpis(),kDone=ka.filter(k=>isKpiOk(k)).length,kIp=ka.filter(k=>k.type==='percent'&&getKpiVal(k.id)>0&&!isKpiOk(k)).length,kPend=ka.length-kDone-kIp;
+  const kPct=Math.round(kDone/ka.length*100);
+
+  const statCards=[
+    ['Total de KPIs',ka.length,'#2060D0','indicadores mapeados'],
+    ['Atingidos',kDone,'#12A068',kPct+'% do total'],
+    ['Em Progresso',kIp,'#E05525','parcialmente alcançados'],
+    ['Pendentes',kPend,'#D08020','aguardando registro']
+  ].map(([l,v,c,s])=>`<div class="card stat-card" style="border-top-color:${c}">
+    <div class="text-xs font-7 text-muted mb-6" style="letter-spacing:.06em;text-transform:uppercase">${l}</div>
+    <div style="font-size:34px;font-weight:800;color:${c};line-height:1;margin-bottom:4px">${v}</div>
+    <div class="text-xs text-muted">${s}</div>
+  </div>`).join('');
+
+  const qSummary=QUARTERS.map(q=>{
+    const qk=q.phases.flatMap(p=>p.kpis),qkd=qk.filter(k=>isKpiOk(k)).length,qpct=Math.round(qkd/qk.length*100);
+    return`<div class="card p-20" style="border-left:3px solid ${q.color}">
+      <div class="flex justify-between items-center mb-10">
+        <div>${chip(q.label,q.color,q.color+'12',q.color+'40')}<div class="text-xs text-muted mt-4">${qkd}/${qk.length} atingidos</div></div>
+        <div style="font-size:24px;font-weight:800;color:${q.color}">${qpct}%</div>
+      </div>
+      ${pbar(qpct,q.color,5)}
+    </div>`;
+  }).join('');
+
+  const phaseSections=QUARTERS.filter(q=>fq==='all'||q.id===fq).map(q=>(
+    q.phases.map(p=>{
+      const achieved=p.kpis.filter(k=>isKpiOk(k)).length,pct=Math.round(achieved/p.kpis.length*100);
+      const rows=p.kpis.map(kpi=>{
+        const ok=isKpiOk(kpi);
+        if(kpi.type==='percent'){
+          const val=getKpiVal(kpi.id),tgt=kpi.target,barPct=tgt?Math.min(val/tgt*100,100):val;
+          const statColor=ok?'#12A068':val>0?'#E05525':'#D08020';
+          const statBg=ok?'#EAFAF5':val>0?'#FEF2EE':'#FFF8EC';
+          const statRing=ok?'#80D8B8':val>0?'#F8B0A0':'#F0C878';
+          const statLabel=ok?'✓ Atingido':val>0?'◐ Em andamento':'○ Pendente';
+          return`<div class="kpi-row${ok?' kpi-ok':''}">
+            <span class="kpi-text${ok?' done-text':''}">${esc(kpi.text)}</span>
+            <div class="kpi-num-wrap">
+              <input type="number" min="0" max="100" class="kpi-input" value="${val}" data-action="kpi-num" data-id="${kpi.id}" placeholder="0"/>
+              <span class="kpi-meta">% ${tgt?'/ Meta: '+tgt+'%':''}</span>
+              <div class="kpi-bar-wrap">${pbar(barPct,ok?'#12A068':q.color,5,'#E8F0F8')}</div>
             </div>
-          ))}
+            <span class="kpi-status-chip" style="color:${statColor};background:${statBg};border-color:${statRing}">${statLabel}</span>
+          </div>`;
+        } else {
+          return`<div class="kpi-row${ok?' kpi-ok':''}">
+            <span class="kpi-text${ok?' done-text':''}">${esc(kpi.text)}</span>
+            <button class="kpi-toggle${ok?' achieved':' pending'}" data-action="kpi-bin" data-id="${kpi.id}">
+              ${ok?'✓ Concluído':'○ Pendente'}
+            </button>
+          </div>`;
+        }
+      }).join('');
+      return`<div class="card ovh mb-10">
+        <div class="acc-header open">
+          <span style="width:28px;height:28px;border-radius:8px;background:${q.color}15;border:1px solid ${q.color}40;color:${q.color};font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${p.num}</span>
+          <span class="text-base font-6 flex-1">${esc(p.name)}</span>
+          ${chip(q.label,q.color,q.color+'12',q.color+'35')}
+          <span class="text-xs text-muted">${achieved}/${p.kpis.length} atingidos</span>
+          <div style="width:68px">${pbar(pct,q.color,4)}</div>
         </div>
-      </div>
-      <div>
-        <div style={{fontSize:11,fontWeight:700,color:"#94A3B8",letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:12}}>Progresso por Trimestre</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-          {QUARTERS.map(q=><QCard key={q.id} q={q} sts={sts}/>)}
-        </div>
-      </div>
-      {upcoming.length>0&&(
-        <div>
-          <div style={{fontSize:11,fontWeight:700,color:"#94A3B8",letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:12}}>Próximas Entregas</div>
-          <div style={{background:"#FFF",border:"1px solid #E5EAF2",borderRadius:14,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,.04)"}}>
-            {upcoming.map((item,i)=>{
-              const qd=QUARTERS.find(q=>q.phases.some(p=>p.items.includes(item)));
-              const s=ST[getSt(sts,item.id)];
-              return(
-                <div key={item.id} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 20px",
-                  borderBottom:i<upcoming.length-1?"1px solid #F1F5F9":"none"}}>
-                  <Chip label={qd.label} color={qd.color} bg={qd.color+"12"} border={qd.color+"35"}/>
-                  <span style={{flex:1,fontSize:13,color:"#334155",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.name}</span>
-                  <span style={{fontSize:11,color:"#94A3B8",whiteSpace:"nowrap"}}>{item.wr}</span>
-                  <span style={{fontSize:10,fontWeight:600,color:s.color,background:s.bg,border:`1px solid ${s.ring}`,borderRadius:20,padding:"2px 9px"}}>{s.label}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        <div>${rows}</div>
+      </div>`;
+    }).join('')
+  )).join('');
 
-// ─── TASK ROW ─────────────────────────────────────────────────
-function TaskRow({item,qColor,sts,cycleStatus,setDate}){
-  const st=getSt(sts,item.id);
-  const dt=getDate(sts,item.id);
-  const s=ST[st];
-  const [open,setOpen]=useState(false);
-  return(
-    <div style={{borderBottom:"1px solid #F1F5F9",background:st==="done"?"#F7FDF9":"transparent",transition:"background .2s"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,padding:"12px 18px",flexWrap:"wrap"}}>
-        <span style={{fontSize:10,fontWeight:700,color:qColor,background:qColor+"12",
-          border:`1px solid ${qColor}35`,borderRadius:20,padding:"2px 9px",flexShrink:0}}>{item.id}</span>
-        <div style={{flex:1,minWidth:160}}>
-          <span onClick={()=>setOpen(v=>!v)} style={{fontSize:13,color:st==="done"?"#94A3B8":"#1E293B",
-            cursor:"pointer",textDecoration:st==="done"?"line-through":"none",lineHeight:1.4}}>{item.name}</span>
-        </div>
-        <span style={{fontSize:11,color:"#64748B",background:"#F8FAFC",border:"1px solid #E5EAF2",
-          borderRadius:8,padding:"3px 9px",whiteSpace:"nowrap",flexShrink:0}}>{item.wr} · {item.period}</span>
-        <StatusBtn status={st} onClick={()=>cycleStatus(item.id)}/>
-        <input type="date" value={dt} onChange={e=>setDate(item.id,e.target.value)}
-          style={{background:"#F8FAFC",border:`1px solid ${dt?s.ring:"#E5EAF2"}`,borderRadius:8,
-            color:dt?s.color:"#94A3B8",fontSize:11,padding:"4px 9px",fontFamily:"inherit",
-            cursor:"pointer",outline:"none",flexShrink:0}} title="Data de conclusão"/>
+  return`<div class="flex-col gap-24">
+    <div class="grid-4">${statCards}</div>
+    <div class="card p-22">
+      <div class="flex justify-between items-center mb-14">
+        <div><div class="text-sm font-7">Progresso dos Indicadores de Sucesso</div><div class="text-xs text-muted mt-3">${kDone} de ${ka.length} KPIs atingidos em toda a implementação</div></div>
+        <div style="font-size:36px;font-weight:800;color:#7C3AED">${kPct}<span style="font-size:15px;color:var(--t4)">%</span></div>
       </div>
-      {open&&(
-        <div style={{padding:"0 18px 14px 18px",paddingLeft:52}}>
-          <div style={{fontSize:12,color:"#475569",lineHeight:1.7,background:"#F8FAFC",
-            borderRadius:8,padding:"10px 14px",border:"1px solid #E5EAF2"}}>{item.desc}</div>
-        </div>
-      )}
+      ${pbar(kPct,'#7C3AED',10)}
     </div>
-  );
-}
-
-// ─── PHASE ACCORDION (tasks) ──────────────────────────────────
-function PhaseAccordion({phase,qColor,sts,cycleStatus,setDate}){
-  const [open,setOpen]=useState(true);
-  const all=phase.items;
-  const done=all.filter(i=>getSt(sts,i.id)==="done").length;
-  const pct=Math.round((done/all.length)*100);
-  return(
-    <div style={{marginBottom:10,background:"#FFF",border:"1px solid #E5EAF2",borderRadius:14,overflow:"hidden",boxShadow:"0 1px 3px rgba(0,0,0,.03)"}}>
-      <div onClick={()=>setOpen(v=>!v)} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 18px",
-        cursor:"pointer",background:open?"#FAFBFC":"#FFF",borderBottom:open?"1px solid #F1F5F9":"none",transition:"background .15s"}}>
-        <span style={{width:28,height:28,borderRadius:8,background:qColor+"15",border:`1px solid ${qColor}40`,
-          color:qColor,fontSize:11,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{phase.num}</span>
-        <span style={{flex:1,fontSize:14,fontWeight:600,color:"#1E293B"}}>{phase.name}</span>
-        <span style={{fontSize:11,color:"#94A3B8"}}>{done}/{all.length}</span>
-        <div style={{width:72}}><ProgressBar value={pct} color={qColor} height={4}/></div>
-        <span style={{color:"#94A3B8",transform:open?"rotate(90deg)":"rotate(0deg)",transition:"transform .2s",fontSize:14,lineHeight:1}}>›</span>
-      </div>
-      {open&&all.map(item=><TaskRow key={item.id} item={item} qColor={qColor} sts={sts} cycleStatus={cycleStatus} setDate={setDate}/>)}
+    <div>
+      <div class="section-label">KPIs por Trimestre</div>
+      <div class="grid-2">${qSummary}</div>
     </div>
-  );
-}
-
-// ─── TASKS VIEW ───────────────────────────────────────────────
-function TasksView({sts,cycleStatus,setDate}){
-  const [qf,setQf]=useState("all");
-  const [sf,setSf]=useState("all");
-  const [q,setQ]=useState("");
-  const filtered=QUARTERS.filter(x=>qf==="all"||x.id===qf).map(x=>({
-    ...x,phases:x.phases.map(p=>({...p,items:p.items.filter(i=>{
-      if(sf!=="all"&&getSt(sts,i.id)!==sf)return false;
-      if(q&&!i.name.toLowerCase().includes(q.toLowerCase()))return false;
-      return true;
-    })})).filter(p=>p.items.length>0)
-  })).filter(x=>x.phases.length>0);
-  const count=filtered.reduce((s,x)=>s+x.phases.reduce((ss,p)=>ss+p.items.length,0),0);
-  const SS={background:"#FFF",border:"1px solid #E5EAF2",borderRadius:8,color:"#475569",fontSize:12,
-    padding:"8px 12px",fontFamily:"inherit",outline:"none",cursor:"pointer",boxShadow:"0 1px 2px rgba(0,0,0,.03)"};
-  return(
-    <div style={{display:"flex",flexDirection:"column",gap:20}}>
-      <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
-        <input type="text" placeholder="🔍  Buscar entregável..." value={q} onChange={e=>setQ(e.target.value)}
-          style={{...SS,flex:"1 1 200px",minWidth:180}}/>
-        <select value={qf} onChange={e=>setQf(e.target.value)} style={SS}>
-          <option value="all">Todos os trimestres</option>
-          {QUARTERS.map(x=><option key={x.id} value={x.id}>{x.label} — {x.name}</option>)}
+    <div>
+      <div class="flex items-center gap-14 mb-14 flex-wrap">
+        <div class="section-label" style="margin-bottom:0">Registro por Fase</div>
+        <select class="finput" data-action="filter-kq" style="background:#FFF;border:1px solid var(--border);border-radius:8px;color:var(--t2);font-size:12px;padding:7px 12px;font-family:var(--font);outline:none">
+          <option value="all"${fq==='all'?' selected':''}>Todos os trimestres</option>${qOpts}
         </select>
-        <select value={sf} onChange={e=>setSf(e.target.value)} style={SS}>
-          <option value="all">Todos os status</option>
-          {Object.entries(ST).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
-        </select>
-        <span style={{fontSize:12,color:"#94A3B8",whiteSpace:"nowrap"}}>{count} entrega{count!==1?"s":""}</span>
+        <span class="hint-box" style="margin-bottom:0;flex:1">💡 Para KPIs numéricos, insira o valor atual em %. Para KPIs binários, clique para marcar como concluído.</span>
       </div>
-      <div style={{fontSize:11,color:"#94A3B8",background:"#F8FAFC",border:"1px solid #E5EAF2",borderRadius:8,padding:"8px 14px"}}>
-        💡 Clique no nome da entrega para ver a descrição · Clique no badge de status para alterar · Preencha a data de conclusão ao finalizar
-      </div>
-      {filtered.map(x=>(
-        <div key={x.id}>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-            <Chip label={x.label} color={x.color} bg={x.color+"12"} border={x.color+"40"}/>
-            <span style={{fontSize:13,fontWeight:600,color:"#334155"}}>{x.name}</span>
-            <span style={{fontSize:11,color:"#94A3B8"}}>· {x.period}</span>
-          </div>
-          {x.phases.map(p=><PhaseAccordion key={p.id} phase={p} qColor={x.color} sts={sts} cycleStatus={cycleStatus} setDate={setDate}/>)}
-        </div>
-      ))}
-      {filtered.length===0&&<div style={{textAlign:"center",color:"#94A3B8",padding:"60px 20px"}}>Nenhum resultado encontrado.</div>}
+      ${phaseSections}
     </div>
-  );
+  </div>`;
 }
 
-// ─── DETAILS VIEW ─────────────────────────────────────────────
-function DetailsView(){
-  const [openPhases,setOpenPhases]=useState({});
-  const toggle=id=>setOpenPhases(v=>({...v,[id]:!v[id]}));
-  const [qf,setQf]=useState("all");
-  const visQ=QUARTERS.filter(x=>qf==="all"||x.id===qf);
-
-  const SEC=({title,icon,children})=>(
-    <div style={{marginBottom:14}}>
-      <div style={{fontSize:11,fontWeight:700,color:"#94A3B8",letterSpacing:"0.06em",textTransform:"uppercase",
-        marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
-        <span>{icon}</span>{title}
-      </div>
-      {children}
-    </div>
-  );
-
-  const BulletList=({items,color})=>(
-    <ul style={{margin:0,padding:0,listStyle:"none",display:"flex",flexDirection:"column",gap:5}}>
-      {items.map((item,i)=>(
-        <li key={i} style={{display:"flex",alignItems:"flex-start",gap:8,fontSize:13,color:"#334155",lineHeight:1.5}}>
-          <span style={{color,fontSize:10,marginTop:4,flexShrink:0}}>●</span>
-          {item}
-        </li>
-      ))}
-    </ul>
-  );
-
-  const SS={background:"#FFF",border:"1px solid #E5EAF2",borderRadius:8,color:"#475569",fontSize:12,
-    padding:"8px 12px",fontFamily:"inherit",outline:"none",cursor:"pointer",boxShadow:"0 1px 2px rgba(0,0,0,.03)"};
-
-  return(
-    <div style={{display:"flex",flexDirection:"column",gap:24}}>
-      <div style={{display:"flex",gap:10,alignItems:"center"}}>
-        <select value={qf} onChange={e=>setQf(e.target.value)} style={SS}>
-          <option value="all">Todos os trimestres</option>
-          {QUARTERS.map(x=><option key={x.id} value={x.id}>{x.label} — {x.name}</option>)}
-        </select>
-        <span style={{fontSize:12,color:"#94A3B8"}}>Visão completa — todos os campos da planilha</span>
-      </div>
-
-      {visQ.map(q=>(
-        <div key={q.id}>
-          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14,padding:"16px 20px",
-            background:"#FFF",border:"1px solid #E5EAF2",borderRadius:14,borderLeft:`4px solid ${q.color}`,
-            boxShadow:"0 1px 3px rgba(0,0,0,.04)"}}>
-            <Chip label={q.label} color={q.color} bg={q.color+"12"} border={q.color+"40"}/>
-            <div>
-              <div style={{fontSize:15,fontWeight:700,color:"#0F172A"}}>{q.name}</div>
-              <div style={{fontSize:12,color:"#94A3B8"}}>{q.period}</div>
+// ──────── DETAILS ────────
+function renderDetails(){
+  const fq=S.filters.detailQ||'all';
+  const qOpts=QUARTERS.map(q=>`<option value="${q.id}"${fq===q.id?' selected':''}>${q.label} — ${esc(q.name)}</option>`).join('');
+  const sections=QUARTERS.filter(q=>fq==='all'||q.id===fq).map(q=>{
+    const phases=q.phases.map(p=>{
+      const isOpen=S.openDetails[p.id]!==false;
+      const body=!isOpen?'':`<div style="padding:20px 24px">
+        <div class="detail-section">
+          <div class="detail-section-title">🏁 Marcos Finais</div>
+          ${p.marcos.map(m=>`<div class="bullet-li"><span class="bullet-dot" style="color:${q.color}">●</span>${esc(m)}</div>`).join('')}
+        </div>
+        <div class="grid-1-2 mb-20">
+          <div class="info-box"><div class="info-box-title">👤 Responsável</div><div class="text-sm font-6 text-2">${esc(p.responsible)}</div></div>
+          <div class="info-box"><div class="info-box-title">👥 Participantes Chave</div><div class="flex flex-wrap gap-6">${p.participants.map(x=>`<span style="font-size:12px;color:var(--t2);background:#FFF;border:1px solid var(--border);border-radius:20px;padding:2px 10px">${esc(x)}</span>`).join('')}</div></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">📋 Entregáveis Detalhados</div>
+          ${p.items.map(item=>`<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid ${q.color};border-radius:10px;padding:14px 16px;margin-bottom:10px">
+            <div class="flex items-center gap-8 mb-10 flex-wrap">
+              ${chip(item.id,q.color,q.color+'12',q.color+'35')}
+              <span class="text-sm font-7 flex-1">${esc(item.name)}</span>
+              <span style="font-size:11px;color:var(--t3);background:#FFF;border:1px solid var(--border);border-radius:8px;padding:2px 8px;white-space:nowrap;flex-shrink:0">${item.wr} · ${item.period}</span>
             </div>
-          </div>
-
-          {q.phases.map(p=>{
-            const isOpen=openPhases[p.id]!==false; // default open
-            return(
-              <div key={p.id} style={{marginBottom:10,background:"#FFF",border:"1px solid #E5EAF2",
-                borderRadius:14,overflow:"hidden",boxShadow:"0 1px 3px rgba(0,0,0,.03)"}}>
-                {/* Phase header */}
-                <div onClick={()=>toggle(p.id)} style={{display:"flex",alignItems:"center",gap:12,
-                  padding:"14px 20px",cursor:"pointer",background:isOpen?"#FAFBFC":"#FFF",
-                  borderBottom:isOpen?"1px solid #F1F5F9":"none"}}>
-                  <span style={{width:30,height:30,borderRadius:8,background:q.color+"15",
-                    border:`1px solid ${q.color}40`,color:q.color,fontSize:12,fontWeight:700,
-                    display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{p.num}</span>
-                  <span style={{flex:1,fontSize:15,fontWeight:700,color:"#0F172A"}}>{p.name}</span>
-                  <span style={{color:"#94A3B8",transform:isOpen?"rotate(90deg)":"rotate(0deg)",
-                    transition:"transform .2s",fontSize:16,lineHeight:1}}>›</span>
-                </div>
-
-                {isOpen&&(
-                  <div style={{padding:"20px 24px",display:"flex",flexDirection:"column",gap:20}}>
-                    {/* Marcos */}
-                    <SEC title="Marcos Finais do Trimestre" icon="🏁">
-                      <BulletList items={p.marcos} color={q.color}/>
-                    </SEC>
-
-                    {/* Responsável + Participantes */}
-                    <div style={{display:"grid",gridTemplateColumns:"1fr 2fr",gap:14}}>
-                      <div style={{background:"#F8FAFC",border:"1px solid #E5EAF2",borderRadius:10,padding:"14px 16px"}}>
-                        <div style={{fontSize:11,fontWeight:700,color:"#94A3B8",letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:8}}>👤 Responsável</div>
-                        <div style={{fontSize:13,fontWeight:600,color:"#334155"}}>{p.responsible}</div>
-                      </div>
-                      <div style={{background:"#F8FAFC",border:"1px solid #E5EAF2",borderRadius:10,padding:"14px 16px"}}>
-                        <div style={{fontSize:11,fontWeight:700,color:"#94A3B8",letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:8}}>👥 Participantes Chave</div>
-                        <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                          {p.participants.map(x=>(
-                            <span key={x} style={{fontSize:12,color:"#475569",background:"#FFF",
-                              border:"1px solid #E5EAF2",borderRadius:20,padding:"2px 10px"}}>{x}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Entregáveis Detalhados */}
-                    <SEC title="Entregáveis Detalhados" icon="📋">
-                      <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                        {p.items.map(item=>(
-                          <div key={item.id} style={{background:"#F8FAFC",border:"1px solid #E5EAF2",
-                            borderRadius:10,padding:"14px 16px",borderLeft:`3px solid ${q.color}`}}>
-                            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-                              <Chip label={item.id} color={q.color} bg={q.color+"12"} border={q.color+"35"}/>
-                              <span style={{fontSize:13,fontWeight:700,color:"#1E293B"}}>{item.name}</span>
-                              <span style={{marginLeft:"auto",fontSize:11,color:"#64748B",background:"#FFF",
-                                border:"1px solid #E5EAF2",borderRadius:8,padding:"2px 8px",whiteSpace:"nowrap",flexShrink:0}}>
-                                {item.wr} · {item.period}
-                              </span>
-                            </div>
-                            <ul style={{margin:0,padding:0,listStyle:"none",display:"flex",flexDirection:"column",gap:4}}>
-                              {item.bullets.map((b,i)=>(
-                                <li key={i} style={{display:"flex",alignItems:"flex-start",gap:8,fontSize:12,color:"#475569",lineHeight:1.5}}>
-                                  <span style={{color:q.color,fontSize:9,marginTop:4.5,flexShrink:0}}>◆</span>{b}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
-                    </SEC>
-
-                    {/* KPIs */}
-                    <SEC title="Indicadores de Sucesso (KPIs)" icon="📊">
-                      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:8}}>
-                        {p.kpis.map((k,i)=>(
-                          <div key={i} style={{background:"#F8FAFC",border:"1px solid #E5EAF2",borderRadius:8,
-                            padding:"10px 12px",display:"flex",alignItems:"flex-start",gap:8}}>
-                            <span style={{color:"#3B82F6",fontSize:9,marginTop:4,flexShrink:0}}>◆</span>
-                            <span style={{fontSize:12,color:"#334155",lineHeight:1.4}}>{k}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </SEC>
-
-                    {/* Goals */}
-                    <SEC title="Metas do RH para o Trimestre" icon="🎯">
-                      <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                        {p.goals.map((g,i)=>(
-                          <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"10px 14px",
-                            background:q.color+"08",border:`1px solid ${q.color}25`,borderRadius:8}}>
-                            <span style={{color:q.color,fontWeight:700,fontSize:12,flexShrink:0}}>{i+1}.</span>
-                            <span style={{fontSize:13,color:"#334155",lineHeight:1.4}}>{g}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </SEC>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+            ${item.bullets.map(b=>`<div class="bullet-li"><span class="bullet-dot" style="color:${q.color}">◆</span>${esc(b)}</div>`).join('')}
+          </div>`).join('')}
         </div>
-      ))}
-    </div>
-  );
+        <div class="detail-section">
+          <div class="detail-section-title">📊 Indicadores de Sucesso (KPIs)</div>
+          <div class="grid-auto">${p.kpis.map(k=>`<div class="kpi-card-d"><span class="bullet-dot" style="color:#2060D0;margin-top:3px">◆</span>${esc(k.text)}${k.type==='percent'&&k.target?` <span style="color:var(--orange);font-weight:700">· Meta: ${k.target}%</span>`:''}</div>`).join('')}</div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">🎯 Metas do RH para o Trimestre</div>
+          ${p.goals.map((g,i)=>`<div class="goal-item" style="background:${q.color}08;border:1px solid ${q.color}25"><span class="goal-num" style="color:${q.color};font-weight:700;font-size:12px;flex-shrink:0">${i+1}.</span><span style="font-size:13px;color:var(--t2);line-height:1.4">${esc(g)}</span></div>`).join('')}
+        </div>
+      </div>`;
+      return`<div class="card ovh mb-10">
+        <div class="acc-header${isOpen?' open':''}" data-action="toggle-detail" data-id="${p.id}">
+          <span style="width:30px;height:30px;border-radius:8px;background:${q.color}15;border:1px solid ${q.color}40;color:${q.color};font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${p.num}</span>
+          <span class="text-lg font-7 flex-1" style="color:var(--t1)">${esc(p.name)}</span>
+          <span class="acc-arrow">›</span>
+        </div>${body}
+      </div>`;
+    }).join('');
+    return`<div class="mb-10">
+      <div class="card p-20 mb-14 flex items-center gap-12" style="border-left:4px solid ${q.color}">
+        ${chip(q.label,q.color,q.color+'12',q.color+'40')}
+        <div><div class="text-lg font-7">${esc(q.name)}</div><div class="text-xs text-muted">${esc(q.period)}</div></div>
+      </div>${phases}
+    </div>`;
+  }).join('');
+  return`<div>
+    <div class="filter-row">
+      <select class="finput" data-action="filter-dq"><option value="all"${fq==='all'?' selected':''}>Todos os trimestres</option>${qOpts}</select>
+      <span class="text-xs text-muted">Visão completa — todos os campos da planilha de implementação</span>
+    </div>${sections}
+  </div>`;
 }
 
-// ─── TIMELINE VIEW ────────────────────────────────────────────
-function TimelineView({sts}){
+// ──────── TIMELINE ────────
+function renderTimeline(){
   const W=28;
-  const MONTHS=[
-    {label:"Junho",ws:[1,2,3,4]},{label:"Julho",ws:[5,6,7,8]},
-    {label:"Agosto",ws:[9,10,11,12]},{label:"Setembro",ws:[13,14,15,16]},
-    {label:"Outubro",ws:[17,18,19,20]},{label:"Novembro",ws:[21,22,23,24,25]},
-    {label:"Dezembro",ws:[26,27,28]}
-  ];
+  const MONTHS=[{l:'Junho',n:4},{l:'Julho',n:4},{l:'Agosto',n:4},{l:'Setembro',n:4},{l:'Outubro',n:4},{l:'Novembro',n:5},{l:'Dezembro',n:3}];
   const COL=100/W;
-  return(
-    <div style={{overflowX:"auto"}}>
-      <div style={{minWidth:900}}>
-        <div style={{display:"flex",marginBottom:4,paddingLeft:220}}>
-          {MONTHS.map(m=>(
-            <div key={m.label} style={{width:`${m.ws.length*COL}%`,fontSize:10,fontWeight:700,
-              color:"#64748B",textTransform:"uppercase",letterSpacing:"0.07em",
-              borderLeft:"1px solid #E5EAF2",paddingLeft:6}}>{m.label}</div>
-          ))}
-        </div>
-        <div style={{display:"flex",marginBottom:14,paddingLeft:220}}>
-          {Array.from({length:W},(_,i)=>i+1).map(w=>(
-            <div key={w} style={{width:`${COL}%`,textAlign:"center",fontSize:9,color:"#CBD5E1",
-              borderLeft:"1px solid #F1F5F9"}}>{w}</div>
-          ))}
-        </div>
-        {QUARTERS.map(q=>(
-          <div key={q.id} style={{marginBottom:18}}>
-            <div style={{display:"flex",alignItems:"center",marginBottom:6}}>
-              <div style={{width:220,paddingRight:12,flexShrink:0}}>
-                <Chip label={`${q.label} — ${q.name.split(" ").slice(0,3).join(" ")}…`} color={q.color} bg={q.color+"10"} border={q.color+"30"}/>
-              </div>
-              <div style={{flex:1,height:1,background:q.color+"25"}}/>
-            </div>
-            {q.phases.map(p=>(
-              <div key={p.id} style={{marginBottom:2}}>
-                <div style={{display:"flex",alignItems:"flex-start",marginBottom:2}}>
-                  <div style={{width:220,flexShrink:0,paddingRight:12,paddingLeft:12}}>
-                    <span style={{fontSize:11,color:"#64748B",display:"block",lineHeight:1.3}}>
-                      {p.num}. {p.name.split(" ").slice(0,4).join(" ")}
-                    </span>
-                  </div>
-                </div>
-                {p.items.map(item=>{
-                  const st=getSt(sts,item.id);
-                  const s=ST[st];
-                  const L=((item.ws-1)/W)*100;
-                  const Ww=((item.we-item.ws+1)/W)*100;
-                  return(
-                    <div key={item.id} style={{display:"flex",alignItems:"center",height:24,marginBottom:2}}>
-                      <div style={{width:220,flexShrink:0,paddingRight:12,paddingLeft:24}}>
-                        <span style={{fontSize:10,color:st==="done"?"#94A3B8":"#475569",
-                          textDecoration:st==="done"?"line-through":"none",
-                          display:"block",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                          {item.id} {item.name}
-                        </span>
-                      </div>
-                      <div style={{flex:1,position:"relative",height:"100%"}}>
-                        {Array.from({length:W},(_,i)=>(
-                          <div key={i} style={{position:"absolute",left:`${(i/W)*100}%`,
-                            top:0,bottom:0,width:1,background:"#F1F5F9"}}/>
-                        ))}
-                        <div style={{position:"absolute",left:`${L}%`,width:`${Ww}%`,
-                          top:"12%",height:"76%",background:st==="done"?s.dot:q.color,
-                          opacity:st==="done"?0.35:0.75,borderRadius:3,transition:"opacity .2s"}}
-                          title={`${item.id}: ${item.name} · ${item.wr} · ${s.label}`}/>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        ))}
-        <div style={{display:"flex",gap:20,marginTop:12,paddingLeft:220,flexWrap:"wrap"}}>
-          {Object.entries(ST).map(([k,v])=>(
-            <div key={k} style={{display:"flex",alignItems:"center",gap:6}}>
-              <span style={{width:22,height:7,borderRadius:3,background:v.dot,opacity:k==="done"?0.35:0.75,flexShrink:0}}/>
-              <span style={{fontSize:11,color:"#64748B"}}>{v.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  const mRow=MONTHS.map(m=>`<div class="tl-month-cell" style="width:${m.n*COL}%">${m.l}</div>`).join('');
+  const wRow=Array.from({length:W},(_,i)=>`<div class="tl-week-cell" style="width:${COL}%">${i+1}</div>`).join('');
+  const rows=QUARTERS.map(q=>{
+    const pRows=q.phases.map(p=>{
+      const ph=`<div class="tl-row"><div class="tl-label" style="padding-left:12px;font-weight:600;color:var(--t3)">${p.num}. ${esc(p.name.split(' ').slice(0,4).join(' '))}</div><div class="tl-bar-wrap"></div></div>`;
+      const iRows=p.items.map(item=>{
+        const st=getSt(item.id),sc=ST_CFG[st],L=((item.ws-1)/W)*100,BW=((item.we-item.ws+1)/W)*100;
+        const color=st==='done'?sc.dot:q.color,opacity=st==='done'?0.3:0.7;
+        return`<div class="tl-row"><div class="tl-label" style="padding-left:24px;${st==='done'?'text-decoration:line-through;color:var(--t4)':''}">${item.id} ${esc(item.name)}</div>
+          <div class="tl-bar-wrap"><div class="tl-bar" title="${item.id}: ${esc(item.name)} · ${item.wr} · ${sc.label}" style="left:${L}%;width:${BW}%;background:${color};opacity:${opacity}"></div></div>
+        </div>`;
+      }).join('');
+      return ph+iRows;
+    }).join('');
+    return`<div style="margin-bottom:18px">
+      <div class="tl-row mb-6"><div style="width:220px;flex-shrink:0;padding-right:12px">${chip(q.label+' — '+q.name.split(' ').slice(0,3).join(' ')+'…',q.color,q.color+'10',q.color+'30')}</div><div style="flex:1;height:1px;background:${q.color}20;align-self:center"></div></div>
+      ${pRows}
+    </div>`;
+  }).join('');
+  const leg=Object.entries(ST_CFG).map(([k,v])=>`<div class="tl-legend-item"><span class="tl-legend-color" style="background:${v.dot};opacity:${k==='done'?0.3:0.7}"></span>${v.label}</div>`).join('');
+  return`<div class="timeline-wrap"><div style="min-width:900px">
+    <div class="tl-month-row mb-4">${mRow}</div>
+    <div class="tl-week-row" style="margin-bottom:14px">${wRow}</div>
+    ${rows}
+    <div class="tl-legend">${leg}</div>
+  </div></div>`;
 }
 
-// ─── MAIN ─────────────────────────────────────────────────────
-export default function HRDashboard(){
-  const [tab,setTab]=useState("dashboard");
-  const [sts,setSts]=useState({});
-  const [loading,setLoading]=useState(true);
-
-  useEffect(()=>{
-    (async()=>{
-      try{ const r=await window.storage.get(STORAGE_KEY); if(r)setSts(JSON.parse(r.value)); }catch{}
-      setLoading(false);
-    })();
-  },[]);
-
-  const persist=async d=>{ try{await window.storage.set(STORAGE_KEY,JSON.stringify(d));}catch{} };
-
-  const cycleStatus=async id=>{
-    const cur=getSt(sts,id);
-    const nxt=ST_ORDER[(ST_ORDER.indexOf(cur)+1)%ST_ORDER.length];
-    const completedAt=nxt==="done"?new Date().toISOString().split("T")[0]:nxt==="pending"?null:getDate(sts,id);
-    const upd={...sts,[id]:{status:nxt,completedAt}};
-    setSts(upd); await persist(upd);
-  };
-  const setDate=async(id,date)=>{
-    const upd={...sts,[id]:{...(sts[id]||{status:"pending"}),completedAt:date}};
-    setSts(upd); await persist(upd);
-  };
-
-  if(loading) return(
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",
-      height:"100vh",background:"#F4F7FB",fontFamily:"Plus Jakarta Sans,sans-serif",color:"#FF5A1A",fontSize:16}}>
-      Carregando…
-    </div>
-  );
-
-  const all=allItems();
-  const done=all.filter(i=>getSt(sts,i.id)==="done").length;
-  const ip=all.filter(i=>getSt(sts,i.id)==="in_progress").length;
-  const pct=Math.round((done/all.length)*100);
-
-  const TABS=[
-    {id:"dashboard",label:"Visão Geral"},
-    {id:"tasks",label:"Tarefas"},
-    {id:"details",label:"Detalhes Completos"},
-    {id:"timeline",label:"Linha do Tempo"},
-  ];
-
-  return(
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        *{box-sizing:border-box;}
-        body{margin:0;padding:0;background:#F4F7FB;}
-        ::-webkit-scrollbar{width:6px;height:6px;}
-        ::-webkit-scrollbar-track{background:#F4F7FB;}
-        ::-webkit-scrollbar-thumb{background:#D1D9E6;border-radius:99px;}
-        ::-webkit-scrollbar-thumb:hover{background:#B0BCCE;}
-        input[type="date"]::-webkit-calendar-picker-indicator{opacity:.5;cursor:pointer;}
-        select option{background:#FFF;color:#1E293B;}
-        button:hover{filter:brightness(.95);}
-      `}</style>
-
-      <div style={{fontFamily:"Plus Jakarta Sans,sans-serif",background:"#F4F7FB",minHeight:"100vh",display:"flex",flexDirection:"column",color:"#1E293B"}}>
-
-        {/* HEADER */}
-        <header style={{background:"#FFF",borderBottom:"1px solid #E5EAF2",padding:"14px 28px",
-          display:"flex",alignItems:"center",gap:20,flexShrink:0,
-          boxShadow:"0 1px 4px rgba(0,0,0,.05)"}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <div style={{width:38,height:38,borderRadius:10,background:"#FF5A1A",display:"flex",
-              alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:"#FFF"}}>L</div>
-            <div>
-              <div style={{fontSize:16,fontWeight:800,color:"#0F172A",lineHeight:1,letterSpacing:"-0.3px"}}>
-                LET<span style={{color:"#FF5A1A"}}>'S</span> <span style={{color:"#94A3B8",fontWeight:500}}>· RH</span>
-              </div>
-              <div style={{fontSize:10,color:"#CBD5E1",letterSpacing:"0.07em",fontWeight:600}}>IMPLEMENTAÇÃO 2026</div>
-            </div>
-          </div>
-          <div style={{width:1,height:36,background:"#E5EAF2"}}/>
-          <div style={{display:"flex",gap:22,flex:1}}>
-            {[["#3B82F6","Total",all.length],["#059669","Concluídas",done],["#FF5A1A","Em Andamento",ip],["#D97706","Pendentes",all.length-done-ip]].map(([c,l,v])=>(
-              <div key={l} style={{display:"flex",alignItems:"center",gap:6}}>
-                <span style={{fontSize:20,fontWeight:800,color:c,lineHeight:1}}>{v}</span>
-                <span style={{fontSize:11,color:"#94A3B8",lineHeight:1.2}}>{l}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-            <div style={{textAlign:"right"}}>
-              <div style={{fontSize:10,color:"#94A3B8",fontWeight:600}}>PROGRESSO</div>
-              <div style={{fontSize:22,fontWeight:800,color:"#FF5A1A",lineHeight:1}}>{pct}%</div>
-            </div>
-            <div style={{width:100}}><ProgressBar value={pct} color="#FF5A1A" height={8}/></div>
-          </div>
-        </header>
-
-        {/* TABS */}
-        <nav style={{background:"#FFF",borderBottom:"1px solid #E5EAF2",padding:"0 28px",display:"flex",gap:2,flexShrink:0}}>
-          {TABS.map(t=>(
-            <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"12px 18px",background:"none",border:"none",
-              borderBottom:`2px solid ${tab===t.id?"#FF5A1A":"transparent"}`,
-              color:tab===t.id?"#FF5A1A":"#64748B",fontFamily:"inherit",fontSize:13,fontWeight:600,
-              cursor:"pointer",transition:"all .15s",letterSpacing:"0.01em"}}>{t.label}</button>
-          ))}
-        </nav>
-
-        {/* CONTENT */}
-        <main style={{flex:1,overflow:"auto",padding:24}}>
-          {tab==="dashboard"&&<DashboardView sts={sts}/>}
-          {tab==="tasks"&&<TasksView sts={sts} cycleStatus={cycleStatus} setDate={setDate}/>}
-          {tab==="details"&&<DetailsView/>}
-          {tab==="timeline"&&<TimelineView sts={sts}/>}
-        </main>
-      </div>
-    </>
-  );
+// ──────── MAIN RENDER ────────
+function render(){
+  const sf=document.activeElement?.id==='search-input';
+  const views={dashboard:renderDashboard,tasks:renderTasks,indicadores:renderIndicadores,details:renderDetails,timeline:renderTimeline};
+  document.getElementById('app').innerHTML=renderHeader()+renderNav()+`<div class="content">${(views[S.tab]||renderDashboard)()}</div>`;
+  if(sf&&S.tab==='tasks'){const el=document.getElementById('search-input');if(el){el.focus();const v=el.value.length;el.setSelectionRange(v,v);}}
 }
+
+// ──────── EVENTS ────────
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-action]');if(!el)return;
+  const{action,id}=el.dataset;
+  if(action==='tab'){S.tab=id;render();return;}
+  if(action==='cycle'){
+    cycleStatus(id);
+    const row=document.getElementById('row-'+id);
+    if(row){
+      const st=getSt(id),dt=getDate(id),s=ST_CFG[st];
+      row.className='task-row'+(st==='done'?' is-done':'');
+      const btn=row.querySelector('[data-action="cycle"]');
+      if(btn){btn.style.color=s.color;btn.style.background=s.bg;btn.style.borderColor=s.ring;btn.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:${s.dot};display:inline-block;flex-shrink:0"></span>&nbsp;${s.label}`;}
+      const dateEl=row.querySelector('.date-input');
+      if(dateEl){dateEl.value=dt;if(dt){dateEl.classList.add('has-date');dateEl.style.color='#C04020';dateEl.style.borderColor='#F8B0A0';}else{dateEl.classList.remove('has-date');dateEl.style.color='';dateEl.style.borderColor='';}}
+      const nameEl=row.querySelector('[data-action="toggle-task"]');
+      if(nameEl){nameEl.style.color=st==='done'?'var(--t4)':'var(--t1)';nameEl.style.textDecoration=st==='done'?'line-through':'none';}
+    }
+    const all=allItems(),done=all.filter(i=>getSt(i.id)==='done').length,ip=all.filter(i=>getSt(i.id)==='in_progress').length,pct=Math.round(done/all.length*100);
+    const nums=document.querySelectorAll('.h-stat-n');
+    if(nums.length>=4){nums[0].textContent=all.length;nums[1].textContent=done;nums[2].textContent=ip;nums[3].textContent=all.length-done-ip;}
+    const pn=document.querySelector('.h-pct-num');if(pn)pn.textContent=pct+'%';
+    const pf=document.querySelector('.header .pbar-fill');if(pf)pf.style.width=pct+'%';
+    return;
+  }
+  if(action==='toggle-task'){S.openTasks[id]=!S.openTasks[id];const d=document.querySelector(`#row-${id} .task-desc-box`);if(d)d.classList.toggle('open');return;}
+  if(action==='toggle-phase'){S.openPhases[id]=S.openPhases[id]===false?true:false;const h=el.closest('.acc-header'),b=h?.nextElementSibling;if(h&&b){h.classList.toggle('open');b.classList.toggle('open');}return;}
+  if(action==='toggle-detail'){S.openDetails[id]=S.openDetails[id]===false?true:false;render();return;}
+  if(action==='kpi-bin'){
+    const cur=getKpiAchieved(id);
+    S.kpiVals[id]={...(S.kpiVals[id]||{}),achieved:!cur};
+    saveKpis();render();return;
+  }
+});
+
+document.addEventListener('change',e=>{
+  const el=e.target.closest('[data-action]');if(!el)return;
+  const{action,id}=el.dataset;
+  if(action==='set-date'){setDateFn(id,el.value);if(el.value){el.classList.add('has-date');el.style.color='#C04020';el.style.borderColor='#F8B0A0';}else{el.classList.remove('has-date');el.style.color='';el.style.borderColor='';}return;}
+  if(action==='filter-q'){S.filters.q=el.value;render();return;}
+  if(action==='filter-st'){S.filters.st=el.value;render();return;}
+  if(action==='filter-dq'){S.filters.detailQ=el.value;render();return;}
+  if(action==='filter-kq'){S.filters.kpiQ=el.value;render();return;}
+  if(action==='kpi-num'){
+    const val=Math.max(0,Math.min(100,Number(el.value)||0));
+    S.kpiVals[id]={...(S.kpiVals[id]||{}),value:val};
+    saveKpis();render();return;}
+});
+
+document.addEventListener('input',e=>{
+  if(e.target.id==='search-input'){S.filters.search=e.target.value;render();}
+});
+
+// ──────── INIT ────────
+loadState();render();
+</script>
+</body>
+</html>
