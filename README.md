@@ -1,4 +1,3 @@
-# Dashboard-Implementa-o-2026
 import { useState, useEffect } from "react";
 
 // ─────────────────────────────────────────────────────────────
