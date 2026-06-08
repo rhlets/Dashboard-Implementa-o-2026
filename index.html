@@ -375,7 +375,7 @@ const ST_CFG={
 const ST_ORDER=['pending','in_progress','done'];
 const STORAGE_KEY='lets-rh-2026';
 const KPI_KEY='lets-rh-2026-kpis';
-let API_URL='https://script.google.com/macros/s/AKfycbywWp7uNE1p6K1VleY9CH8bDbKppT1rllrDzmUUx3ZzLDUZNdDTQ-Yie2ek9CfGB1kcnw/exec';
+let API_URL='https://script.google.com/macros/s/AKfycbylMzdEqgWtvdXLOzhDrLElJMc3LV4V6mtLI6-I5Rh-RgEt592oghVnqo_RpNBDulp0/exec';
 
 // STATE
 const S={
@@ -389,12 +389,25 @@ const S={
 };
 if(S.editKey)S.editMode=true;
 
+// ─── JSONP (contorna CORS do Google Apps Script) ─────────
+function jsonp(url){
+  return new Promise((resolve,reject)=>{
+    const cb='_gs_'+Date.now();
+    const s=document.createElement('script');
+    const t=setTimeout(()=>{cleanup();reject(new Error('Timeout'));},12000);
+    function cleanup(){clearTimeout(t);delete window[cb];s.parentNode&&s.parentNode.removeChild(s);}
+    window[cb]=d=>{cleanup();resolve(d);};
+    s.onerror=()=>{cleanup();reject(new Error('Script error'));};
+    s.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
+    document.head.appendChild(s);
+  });
+}
+
 // ─── STORAGE / API ───────────────────────────────
 async function loadData(){
   if(!API_URL){loadLocal();render();return;}
   try{
-    const r=await fetch(API_URL+'?action=load', {credentials:'omit', redirect:'follow'});
-    const d=await r.json();
+    const d=await jsonp(API_URL+'?action=load');
     if(d.ok){S.taskSts=d.tasks||{};S.kpiVals=d.kpis||{};}
   }catch(e){console.warn('API indisponível, usando local.',e);loadLocal();}
   render();
@@ -407,11 +420,10 @@ async function apiCall(params){
   if(API_URL){
     try{
       S.saving=true;const si=document.getElementById('save-indicator');if(si)si.style.display='inline-flex';
-      const url=API_URL+'?'+new URLSearchParams({...params,password:S.editKey}).toString();
-      const r=await fetch(url, {credentials:'omit', redirect:'follow'});const d=await r.json();
+      const d=await jsonp(API_URL+'?'+new URLSearchParams({...params,password:S.editKey}).toString());
       S.saving=false;if(si)si.style.display='none';
-      if(d.error==='unauthorized'){S.editMode=false;S.editKey='';sessionStorage.removeItem('lets-edit-key');document.body.classList.add('locked');alert('Sessão expirada. Faça login novamente.');render();return false;}
-      return d.ok;
+      if(d&&d.error==='unauthorized'){S.editMode=false;S.editKey='';sessionStorage.removeItem('lets-edit-key');document.body.classList.add('locked');alert('Sessão expirada. Faça login novamente.');render();return false;}
+      return d&&d.ok;
     }catch(e){S.saving=false;console.warn('Falha ao salvar.',e);}
   }
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(S.taskSts));}catch{}
@@ -690,8 +702,7 @@ async function confirmLogin(){
   errEl.style.display='none';
   if(API_URL){
     try{
-      const r=await fetch(API_URL+'?'+new URLSearchParams({action:'verify',password:pass}).toString(), {credentials:'omit', redirect:'follow'});
-      const d=await r.json();
+      const d=await jsonp(API_URL+'?'+new URLSearchParams({action:'verify',password:pass}).toString());
       if(!d.ok){errEl.style.display='block';return;}
     }catch(e){console.warn('Verificação offline.');}
   }
