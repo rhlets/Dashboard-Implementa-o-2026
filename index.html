@@ -375,7 +375,7 @@ const ST_CFG={
 const ST_ORDER=['pending','in_progress','done'];
 const STORAGE_KEY='lets-rh-2026';
 const KPI_KEY='lets-rh-2026-kpis';
-let API_URL='https://script.google.com/a/macros/uselets.com/s/AKfycbywWp7uNE1p6K1VleY9CH8bDbKppT1rllrDzmUUx3ZzLDUZNdDTQ-Yie2ek9CfGB1kcnw/exec';
+let API_URL='https://script.google.com/macros/s/AKfycbywWp7uNE1p6K1VleY9CH8bDbKppT1rllrDzmUUx3ZzLDUZNdDTQ-Yie2ek9CfGB1kcnw/exec';
 
 // STATE
 const S={
@@ -393,7 +393,7 @@ if(S.editKey)S.editMode=true;
 async function loadData(){
   if(!API_URL){loadLocal();render();return;}
   try{
-    const r=await fetch(API_URL+'?action=load');
+    const r=await fetch(API_URL+'?action=load', {credentials:'omit', redirect:'follow'});
     const d=await r.json();
     if(d.ok){S.taskSts=d.tasks||{};S.kpiVals=d.kpis||{};}
   }catch(e){console.warn('API indisponível, usando local.',e);loadLocal();}
@@ -408,7 +408,7 @@ async function apiCall(params){
     try{
       S.saving=true;const si=document.getElementById('save-indicator');if(si)si.style.display='inline-flex';
       const url=API_URL+'?'+new URLSearchParams({...params,password:S.editKey}).toString();
-      const r=await fetch(url);const d=await r.json();
+      const r=await fetch(url, {credentials:'omit', redirect:'follow'});const d=await r.json();
       S.saving=false;if(si)si.style.display='none';
       if(d.error==='unauthorized'){S.editMode=false;S.editKey='';sessionStorage.removeItem('lets-edit-key');document.body.classList.add('locked');alert('Sessão expirada. Faça login novamente.');render();return false;}
       return d.ok;
@@ -567,7 +567,7 @@ function renderIndicadores(){
     }).join('');
     return`<div class="card ovh mb-10"><div class="acc-header open"><span style="width:28px;height:28px;border-radius:8px;background:${q.color}15;border:1px solid ${q.color}40;color:${q.color};font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${p.num}</span><span class="text-base font-6 flex-1">${esc(p.name)}</span>${chip(q.label,q.color,q.color+'12',q.color+'35')}<span class="text-xs text-muted">${achieved}/${p.kpis.length} atingidos</span><div style="width:68px">${pbar(pct,q.color,4)}</div></div><div>${rows}</div></div>`;
   }).join('')).join('');
-  return`<div class="flex-col gap-24"><div class="grid-4">${statCards}</div><div class="card p-22"><div class="flex justify-between items-center mb-14"><div><div class="text-sm font-7">Progresso dos Indicadores de Sucesso</div><div class="text-xs text-muted mt-3">${kDone} de ${ka.length} KPIs atingidos</div></div><div style="font-size:36px;font-weight:800;color:#7C3AED">${kPct}<span style="font-size:15px;color:var(--t4)">%</span></div></div>${pbar(kPct,'#7C3AED',10)}</div><div><div class="section-label">KPIs por Trimestre</div><div class="grid-2">${qSummary}</div></div><div><div class="flex items-center gap-14 mb-14 flex-wrap"><div class="section-label" style="margin-bottom:0">Registro por Fase</div><select class="finput" data-action="filter-kq" style="${IS}"><option value="all"${fq==='all'?' selected:''}>Todos os trimestres</option>${qOpts}</select><span class="hint-box" style="margin-bottom:0;flex:1">💡 Para KPIs numéricos, insira o valor atual em %. Para KPIs binários, clique para marcar como concluído.</span></div>${phaseSections}</div></div>`;
+  return`<div class="flex-col gap-24"><div class="grid-4">${statCards}</div><div class="card p-22"><div class="flex justify-between items-center mb-14"><div><div class="text-sm font-7">Progresso dos Indicadores de Sucesso</div><div class="text-xs text-muted mt-3">${kDone} de ${ka.length} KPIs atingidos</div></div><div style="font-size:36px;font-weight:800;color:#7C3AED">${kPct}<span style="font-size:15px;color:var(--t4)">%</span></div></div>${pbar(kPct,'#7C3AED',10)}</div><div><div class="section-label">KPIs por Trimestre</div><div class="grid-2">${qSummary}</div></div><div><div class="flex items-center gap-14 mb-14 flex-wrap"><div class="section-label" style="margin-bottom:0">Registro por Fase</div><select class="finput" data-action="filter-kq" style="${IS}"><option value="all"${fq==='all'?' selected':''}>Todos os trimestres</option>${qOpts}</select><span class="hint-box" style="margin-bottom:0;flex:1">💡 Para KPIs numéricos, insira o valor atual em %. Para KPIs binários, clique para marcar como concluído.</span></div>${phaseSections}</div></div>`;
 }
 
 // ──────── DETAILS ────────
@@ -690,7 +690,7 @@ async function confirmLogin(){
   errEl.style.display='none';
   if(API_URL){
     try{
-      const r=await fetch(API_URL+'?'+new URLSearchParams({action:'verify',password:pass}).toString());
+      const r=await fetch(API_URL+'?'+new URLSearchParams({action:'verify',password:pass}).toString(), {credentials:'omit', redirect:'follow'});
       const d=await r.json();
       if(!d.ok){errEl.style.display='block';return;}
     }catch(e){console.warn('Verificação offline.');}
